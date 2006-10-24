@@ -1,0 +1,23 @@
+#!/sbin/runscript
+
+# note that the spoofprotect, syncoockies and ip_forward options are set in 
+# /etc/sysctl.conf
+
+start() {
+	ebegin "Configuring network interfaces"
+	ifup -a
+	eend $?
+}
+
+stop() {
+	ebegin "Deconfiguring network interfaces"
+	ifdown -a
+	eend $?
+}
+
+restart() {
+	ebegin "Reconfiguring network interfaces"
+	ifdown -a && ifup -a
+	eend $?
+}
+

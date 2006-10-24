@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+
+echo ""
+for i in `for j in /etc/rcK.d/K* ; do echo $j ; done | sort -r` ; do
+	[ -f $i ] && $i stop
+done	
+exit 0
+

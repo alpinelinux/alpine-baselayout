@@ -1,0 +1,40 @@
+SCRIPTS = alpinecfg.sh \
+	bootmisc.sh \
+	bridge \
+	checkroot.sh \
+	coldplug \
+	cron \
+	hostname \
+	hwclock \
+	hwdrivers \
+	inetd \
+	localinit \
+	mdev \
+	modutils \
+	mountall \
+	networking \
+	procps \
+	rcK \
+	rcL \
+	rcS \
+	runtimes \
+	syslog \
+	tuntap \
+	udev \
+	udhcpc \
+	watchdog
+
+all:
+
+install: $(SCRIPTS)
+	install -m 0755 -d $(DESTDIR)/etc
+	install -m 0755 -d $(DESTDIR)/etc/init.d
+	
+	for i in $(SCRIPTS) ; do \
+		install -m 755 -D $$i $(DESTDIR)/etc/init.d/$$i ;\
+	done
+	
+clean:
+	rm -f *~
+
+.PHONY: all clean

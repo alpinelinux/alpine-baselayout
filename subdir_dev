@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# scripts that moves devices to the $1/ subdir.
+
+if [ "$ACTION" = remove ] ; then
+	mv $1/$MDEV $MDEV
+	rmdir $1 2>/dev/null
+else
+	mkdir -p $1 
+	mv $MDEV $1
+fi
+	

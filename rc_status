@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# rc_status - show status of boot scripts
+#
+# Copyright (c) 2005 Natanael Copa
+#
+# Distributed under GPL-2
+#
+
+PROGRAM=`basename $0`
+
+#load the libraries
+. /sbin/functions.sh
+
+die() {
+	echo "$1" >&2
+	exit 1
+}
+
+# print usage and die
+usage() {
+	echo "$PROGRAM $VERSION"
+	echo "usage: $PROGRAM [-hv] [-l level] [script]"
+	echo ""
+	echo "  -h  Show help and exit."
+	echo "  -l  Show only specified level."
+	echo "  -v  Turn on verbose output."
+	echo ""
+	exit 1
+}
+
+#parse args
+while getopts "hl:v" opt ; do
+	case "$opt" in
+		h) 	usage;;
+		l)  	case "$OPTARG" in
+				S|L|K) LEVELS="$LEVELS $OPTARG";;
+				*) die "Valid levels are: all, S, K and L";;
+		    	esac
+		    	;;
+		v)	VERBOSE="-v" ;;
+		\?)	usage;;
+	esac
+done
+shift `expr $OPTIND - 1`
+
+cd "$ROOT/etc"
+
+[ -z "$LEVELS" ] && LEVELS="S L K"
+
+for i in $LEVELS ; do
+	echo "rc$i.d:"
+	ls -1 $VERBOSE rc$i.d 2>/dev/null
+	echo ""
+done
+
+exit

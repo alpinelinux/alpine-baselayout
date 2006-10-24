@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# try to load the proper driver for usb devices
+case "$ACTION" in
+	add|"")
+		for i in /sys/class/usb_device/$MDEV/device/*/modalias ; do
+			modprobe `cat $i` 2>/dev/null
+		done
+		;;
+	remove)
+		for i in /sys/class/usb_device/$MDEV/device/*/modalias ; do
+			modprobe -r `cat $i` 2>/dev/null
+		done
+esac
+
+# we dont want the ugly usbdev[0-9].[0-9] dev.
+rm -f $MDEV

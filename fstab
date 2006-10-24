@@ -1,0 +1,9 @@
+none		/proc 		proc 	defaults 0 0
+none 		/sys		sysfs	defaults 0 0
+mdev		/dev		tmpfs	size=100k 0 0
+none		/dev/pts	devpts	defaults 0 0
+tmpfs		/dev/shm	tmpfs	defaults 0 0
+/dev/cdrom	/media/cdrom	iso9660	ro 0 0
+/dev/fd0	/media/floppy	vfat	noauto	0 0
+/dev/usba1	/media/usb	vfat	noauto	0 0
+none		/proc/bus/usb	usbfs noauto 0 0

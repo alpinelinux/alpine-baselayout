@@ -1,0 +1,13 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Starting system logging"
+	syslogd && klogd
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping system logging"
+	killall klogd && killall syslogd
+	eend $?
+}

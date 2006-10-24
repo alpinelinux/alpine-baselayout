@@ -1,0 +1,59 @@
+#!/bin/busybox sh
+
+# we need the proc to be able to install busybox
+/bin/busybox mkdir -p /proc /usr/sbin /sys
+/bin/busybox mount -t proc proc /proc
+/bin/busybox mount -t sysfs none /sys
+
+# install busybox links
+/bin/busybox --install -s
+
+[ -f /etc/alpine-release ] && read RELEASE BUILD < /etc/alpine-release
+echo "Starting $RELEASE"
+
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+
+# use dash if it exists
+[ -x /bin/dash ] && ln -sf /bin/dash /bin/sh
+
+# define some default variables
+export DEFAULT_CFG_MOUNTS="/media/cdrom /media/floppy /media/usb"
+export DEFAULT_ALPINE_CONF="/alpine.conf"
+export DEFAULT_ALPINE_PACKAGES="/packages.conf"
+export DEFAULT_PKG_PATH="cdrom://apks"
+
+# start an rc script. Look if there are a no<service> in /proc/cmdline
+start_script() {
+	local n
+	if [ -f $1 ] ; then
+		for n in `cat /proc/cmdline`; do
+			[ "$n" = "s" ] && SINGLEMODE=yes
+			case $1 in
+				S??no$n)	return 1;;
+			esac
+		done
+		case $1 in
+			*.sh)	. $1 start;;
+			*)	$1 start;;
+		esac
+	fi
+}
+
+# hide kernel messages
+dmesg -n 1
+
+for i in `cat /proc/cmdline` ;do
+	case $i in
+		1|s|single)
+			echo "Entering single mode. Type 'exit' to continue booting."
+			sh
+			;;
+	esac
+done		
+
+# Run all /etc/rcS.d scripts
+for j in /etc/rcS.d/S* ; do
+	start_script $j
+done
+exit 0
+

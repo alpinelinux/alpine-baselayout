@@ -1,0 +1,48 @@
+#!/sbin/runscript
+
+SEC=`date +%s`
+
+# echo a . every second
+timer_dots() {
+	local newsec=`date +%s`
+	if [ "$SEC" != "$newsec" ] ; then
+		echo -n '.'
+		SEC=$newsec
+	fi
+}
+
+# Load hardware drivers
+start() {
+	# check for boot option "nocoldplug"
+	for i in `cat /proc/cmdline`; do
+		case $i in
+			modules=*)
+				MODULES="`echo ${i#modules=} | tr ',' ' '`";;
+			noautodetect)
+				AUTODETECT=no;;
+		esac
+
+	done
+
+	if [ "$MODULES" ] || [ "$AUTODETECT" != no ] ; then
+		ebegin "Loading hardware drivers"
+	else
+		ebegin "Skipping hardware drivers"
+		eend
+		return
+	fi	
+	
+	[ "$MODULES" ] && modprobe $MODULES 2> /dev/null
+	timer_dots
+
+	if [ "$AUTODETECT" != no ] ; then
+		find /sys -name modalias | while read a ; do
+			modprobe `cat $a` 2>/dev/null || \
+				echo $a >> /tmp/hwdrivers.failed
+			timer_dots
+		done
+	fi
+	eend 0
+}
+
+

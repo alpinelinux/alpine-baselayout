@@ -1,0 +1,13 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Starting inetd"
+	inetd $INETD_OPTS
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping inetd"
+	killall inetd
+	eend $?
+}

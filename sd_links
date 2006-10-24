@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# NOTE: since mdev -s only provide $MDEV, don't depend on any hotplug vars.
+
+# function to create a link to a disk (sd[a-z])
+mklink_disk() {
+	local last
+	# find the last disk
+	last=`ls usb[a-z] 2>/dev/null | sort | tail -n 1 | sed 's/usb\([a-z]\).*/\1/'`
+	if [ "$last" ] ; then
+		# get next char in alphabet
+		next=`echo $last | tr 'abcdeghijklmnopqrstuvwxy' \
+				'bcdefghijklmnopqrtuvwxyz'`
+	else	
+		# its the first
+		next="a"
+	fi
+
+	DISKLINK=usb$next
+	ln -sf $DISK $DISKLINK
+}
+
+# function to create a link to a partition (sd[a-z][0-9])
+mklink_partition() {
+	local num
+	num=`echo $MDEV | sed 's/sd[a-z]//'`
+	
+	for i in usb[a-z] ; do
+		if [ "`readlink $i 2>/dev/null`" = $DISK ] ; then
+			DISKLINK=$i
+			break
+		fi
+	done
+
+	# if there are no disk link then create one.
+	[ "$DISKLINK" ] || mklink_disk
+
+	# create the link to the partition
+	ln -sf $MDEV $DISKLINK$num
+}
+
+# check if there already exist an usb link to this dev.
+for i in usb[a-z] usb[a-z][0-9]* ; do
+	if [ "`readlink $i 2>/dev/null`" = $MDEV ] ; then
+		USBLINK=$i
+		break
+	fi
+done
+if [ "$USBLINK" ] ;then
+	# hotplug remove action
+	[ "$ACTION" = "remove" ] && rm $USBLINK
+	
+	# the link already exist or is not supposed to exist. We are done.
+	exit
+fi
+
+# find out if its a disk or a partition
+if [ -d /sys/block/$MDEV ] ; then
+	TYPE=disk
+	DISK=$MDEV
+	SCSIDEV=/sys/block/$MDEV/device/scsi_device:*
+elif [ -d /sys/block/*/$MDEV ] ; then
+	TYPE=partition
+	PARENT=`dirname /sys/block/*/$MDEV`
+	DISK=`basename $PARENT`
+	SCSIDEV=$PARENT/device/scsi_device:*
+else
+	exit
+fi
+
+# check if the scsi host belongs to usb-storage. exit if it doesn't
+SCSI_HOST=`basename $SCSIDEV | cut -d : -f 2`
+[ -f "/proc/scsi/usb-storage/$SCSI_HOST" ] || exit
+
+# create link
+mklink_$TYPE
+
+

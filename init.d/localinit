@@ -1,0 +1,31 @@
+#!/sbin/runscript
+
+mount_once() {
+	if mount | grep $1 >/dev/null 2>&1 ; then
+		NOUMOUNT=$1
+	else
+		mount $1 >/dev/null 2>&1
+	fi		
+}
+
+umount_once() {
+	[ "$NOUMOUNT" != "$1" ] && umount "$1" 2>/dev/null
+}
+
+start() {
+	for media in $MOUNTS ; do
+		m="/media/$media"
+		mount_once $m
+		if [ -e $m/localinit ] ; then
+			ebegin "Running localinit from $media"
+			$m/localinit
+			retcode=$?
+			umount_once $m
+			eend $retcode
+			exit
+		fi
+		sleep 1
+		umount_once $m
+	done
+}
+

@@ -1,0 +1,46 @@
+#!/sbin/runscript
+
+OPENVPN=`which openvpn 2>/dev/null`
+TUNCTL=`which tunctl 2>/dev/null`
+
+if [ -x "$OPENVPN" ] ; then
+	CREATETAP="$OPENVPN --mktun --dev"
+else
+	CREATETAP="$TUNCTL -t"
+fi
+	
+
+start() {
+	# verify tun/tap support in kernel
+	if ! [ -e /dev/net/tun ] ; then
+		modprobe tun 2>&1 >/dev/null && sleep 1
+		if ! [ -e /dev/net/tun ] ; then
+			eerror "Tun/Tap support is not present in kernel"
+			return 1
+		fi
+	fi
+
+	# verify if openvpn is present
+	if [ -x "$OPENVPN" ] ; then
+		MKTUNTAP="$OPENVPN --mktun --dev"
+	elif [ -x "$TUNCTL" ] ; then
+		MKTUNTAP="$TUNCTL -t"
+	else
+		eerror "Needs openvpn or tunctl to create Tun/Tap devices"
+		return 1
+	fi
+	
+	# create devices
+	for iface in $DEVICES ; do
+		ebegin "Creating Tun/Tap interface $iface"
+		$MKTUNTAP  $iface >/dev/null
+		eend $?
+	done
+}
+
+stop() {
+	ebegin "Destroying Tun/Tap interfaces"
+	rmmod tun 2>/dev/null
+	eend $?
+}	
+

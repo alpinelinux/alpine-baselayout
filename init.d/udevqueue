@@ -1,0 +1,11 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Waiting on udev queue"
+	while [ -d /dev/.udev/queue ] ; do
+		sleep 1
+		echo -n "."
+	done
+	eend 0
+}
+

@@ -1,0 +1,5 @@
+# Specify bridges here, separated with spaces.
+# a every bridge is specified as:
+#  bridgename=interface1+interface2[+...]
+
+#BRIDGES="br0=eth0+tap0 br1=eth1+eth2"

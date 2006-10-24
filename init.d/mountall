@@ -1,0 +1,8 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Mounting local filesystems"
+	mount -a -t nonfs,nonfs4,nosmbfs,nocifs,noncp,noncpfs,nocoda,noocfs2,nogfs 2>&1 >/tmp/mountdebug
+	eend $?
+}
+

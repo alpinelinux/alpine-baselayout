@@ -1,0 +1,9 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Setting system time from hardware clock"
+	modprobe rtc 2>/dev/null
+	#set the system time from hardware clock
+	/sbin/hwclock -s -u
+	eend $?
+}

@@ -1,0 +1,7 @@
+# valid login shells
+/bin/ash
+/bin/dash
+#/bin/bash
+#/bin/lash
+#/bin/msh
+

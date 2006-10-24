@@ -1,0 +1,32 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Starting udev"
+	#init sysfs
+	mkdir -p /dev
+
+	# use udevsend for hotplug
+	#echo /sbin/udevsend > /proc/sys/kernel/hotplug
+	echo "" > /proc/sys/kernel/hotplug
+
+	# start udev
+	mount /dev
+	start-stop-daemon --start --quiet --exec /sbin/udevd -- --daemon
+	udevstart 2>/dev/tty10
+	RC=$?
+
+	# create pts file system
+	[ -d /dev/pts ] || mkdir -m 755 /dev/pts
+	[ -c /dev/ptmx ] || mknod -m 666 /dev/ptmx c 5 2
+		
+	mount /dev/pts
+	eend $RC
+}
+
+stop() {
+	ebegin "Stopping udev"
+	start-stop-daemon --stop --quiet --exec /sbin/udevd
+	RC=$?
+	umount /dev/pts && umount /dev
+	eend $RC
+}

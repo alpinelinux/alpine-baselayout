@@ -1,0 +1,38 @@
+#!/sbin/runscript
+
+BRCTL=`which brctl 2>/dev/null`
+
+start() {
+	# abort if brctl does not exist
+	for brspec in $BRIDGES; do
+		retcode=0
+		br=`echo $brspec | cut -d= -f1`
+		ebegin "Setting up bridge $br"
+		if [ -z "$BRCTL" ] ; then
+			eerror "Need bridge-utils to be able to set up $br"
+			retcode=1
+		else
+			brctl addbr $br || retcode=1
+			bridge_ifs=`echo "$BRIDGES"  | sed 's/.*=//; s/\+/ /g'` 
+			for iface in $bridge_ifs ; do
+				# set if in promisc mode
+				ifconfig $iface 0.0.0.0 promisc up || retcode=1
+				brctl addif $br $iface || retcode=1
+			done
+		fi
+		eend $retcode
+	done
+
+}
+
+stop() {
+	which brctl > /dev/null 2>&1 || return 1
+	for brspec in $BRIDGES; do
+		br=`echo $brspec | cut -d= -f1`
+		ebegin "Shutting down bridge $br"
+		brctl delbr $br
+		eend $?
+	done
+	
+
+}

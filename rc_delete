@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# rc_delete - delete an init script from a runlevel
+#
+# Copyright (c) 2005 Natanael Copa
+#
+# Distributed under GPL-2
+#
+
+PROGRAM=`basename $0`
+
+#load the libraries
+. /sbin/functions.sh
+
+LEVEL=4
+
+die() {
+	echo "$1" >&2
+	exit 1
+}
+
+# print usage and die
+usage() {
+	echo "$PROGRAM $VERSION"
+	echo "usage: $PROGRAM [-hv] [-l level] script..."
+	echo ""
+	echo "  -h  Show help and exit."
+	echo "  -l  Only remove from specified level. Default is all levels."
+	echo "  -v  Turn on verbose output."
+	echo ""
+	exit 1
+}
+
+#parse args
+unset vflag
+while getopts "hl:v" opt ; do
+	case "$opt" in
+		h)  usage;;
+		l)  LEVEL="$OPTARG";;
+		v)  vflag="-v"; VERBOSE=1 ;;
+		\?) usage;;
+	esac
+done
+shift `expr $OPTIND - 1`
+
+# check if script is specified
+[ $# -lt 1 ] && usage
+while [ $# -gt 0 ] ; do
+	SCRIPT="$1"
+
+	rclinks=""
+	for rcl in $ROOT/etc/rcS.d/[S][0-9][0-9]$SCRIPT \
+		$ROOT/etc/rcL.d/[SK][0-9][0-9]$SCRIPT \
+		$ROOT/etc/rcK.d/[SK][0-9][0-9]$SCRIPT ; do
+		[ -e "$rcl" ] || continue
+		echo "$rcl"
+		rclinks="$rclinks $rcl"
+	done
+	
+	for rclink in $rclinks ; do
+		[ "$VERBOSE" ] && echo "Removing $rclink."
+		rm -f $rclink
+	done
+	shift
+done
+
+exit 0
+

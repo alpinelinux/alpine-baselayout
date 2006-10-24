@@ -1,0 +1,109 @@
+#!/sbin/runscript
+
+# The purpose of this script is to load the Alpine runtime modules and the 
+# local config that belongs to.
+
+SFIC=`which sfic 2>/dev/null`
+COMMITED_TDB=/var/lib/apk/commited.tdb
+
+# search for a kernel argument
+get_karg () {
+	for i in `cat /proc/cmdline` ; do
+		case $i in
+			$1=*) echo $i | sed 's|'$1'=||' ;;
+        	esac
+	done
+}
+
+get_pkg_list() {
+	# we skip lines that start with '#'
+	grep -v '^#' $1 | while read pkg ; do
+		for i in $pkg ; do
+			echo -n "$pkg "
+		done
+	done 
+}
+
+# load packages from mounted media
+load_pkgs_and_config() {
+	# params:
+	#  $1 = path to mounted media
+	#  $2 = 
+	local apk_list mnt ovl allpkgs pkg
+	mnt=$1
+	apk_list="$mnt/packages.list"
+	if [ -f "$apk_list" ] ; then
+		echo "
+   Loading packages from $apk_list:"
+		apk_fetch -u -q
+		for pkg in  `get_pkg_list $apk_list` ; do
+			apk_add -q $pkg
+			echo "     $pkg"
+		done 
+	fi
+	cd /	
+	# look for apk overlays.
+	for ovl in $mnt/*.apkovl.tar.gz ; do
+		if [ -f $ovl ] ; then
+			# remember to remove leading /
+			ovllist=`tar -C / -zvxf $ovl | sed 's:^/::'`
+			if [ "$ovllist" ] ; then
+				echo "   Reading overlay: $ovl"
+				lbu update $ovllist 2>/dev/null
+			fi
+		fi
+	done
+}
+
+mount_once() {
+	if grep $1 < /proc/mounts >/dev/null 2>&1 ; then
+		NOUMOUNT=$1
+	else
+		mount $1 >/dev/null 2>&1
+	fi		
+}
+
+umount_once() {
+	[ "$NOUMOUNT" != "$1" ] && umount "$1" 2>/dev/null
+}
+
+start() {
+	ebegin "Searching for local configurations"
+	# just in case...
+	modprobe usb-storage 2>/dev/null
+	modprobe sd_mod 2>/dev/null
+	modprobe floppy 2>/dev/null
+	modprobe cdrom 2>/dev/null
+
+	# if pkg_path is not specified as kernel arg, look for the packages 
+	# on mounted cdrom
+	APK_PATH=`get_karg pkg_path`
+
+	# read configs if available
+	[ -f /etc/apk.conf ] && . /etc/apk.conf
+
+	[ -z "$APK_PATH" ] && APK_PATH="cdrom://apks"
+	export APK_PATH
+
+	# APK_CFG_MOUNTS
+	# if set, will only try to mount those, other wise try everything 
+	# in /media/*
+	if [ "$APK_CFG_MOUNTS" ] ; then
+	mounts="$APK_CFG_MOUNTS"
+	else
+		mounts="*"
+	fi
+
+	cd /media
+	for m in $mounts ; do
+		mount_once /media/$m
+		load_pkgs_and_config /media/$m
+		sleep 1
+		umount_once /media/$m
+	done
+	eend 
+
+	# if there are no /etc/apk.conf, create one
+	[ -f /etc/apk.conf ] || echo "APK_PATH=$APK_PATH" > /etc/apk.conf
+}
+

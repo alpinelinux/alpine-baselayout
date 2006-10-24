@@ -1,0 +1,14 @@
+#!/sbin/runscript
+
+start() {
+	[ "$WATCHDOG_DEV" ] || die "WATCHDOG_DEV is not set" 
+	ebegin "Starting $SVCNAME"
+	$SVCNAME $WATCHDOG_OPTS $WATCHDOG_DEV
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping $SVCNAME"
+	killall $SVCNAME
+	eend $?
+}
