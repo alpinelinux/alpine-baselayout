@@ -1,4 +1,4 @@
-VERSION=1.1.0_alpha1
+VERSION=1.1
 PV = alpine-baselayout-$(VERSION)
 TARBALL = $(PV).tar.gz
 
@@ -6,7 +6,7 @@ SUBDIRS = src init.d
 
 GENERATED_FILES = TZ hosts profile
 ETC_FILES = $(GENERATED_FILES) group fstab inittab nsswitch.conf passwd protocols services shadow shells issue mdev.conf crontab sysctl.conf
-CONFD_FILES = $(addprefix conf.d/, bridge cron localinit tuntap watchdog)
+CONFD_FILES = $(addprefix conf.d/, cron localinit tuntap watchdog)
 SBIN_FILES = runscript-alpine.sh functions.sh rc_add rc_delete rc_status
 RC_SH_FILES = rc-services.sh
 UDHCPC_FILES = default.script 

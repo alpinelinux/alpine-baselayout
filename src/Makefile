@@ -4,7 +4,7 @@ LD = gcc
 
 #BIN_TARGETS = splashbard
 #SBIN_TARGETS = runscript start-stop-daemon
-SBIN_TARGETS = runscript readahead
+SBIN_TARGETS = runscript
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS)
 
 .PHONY: all clean

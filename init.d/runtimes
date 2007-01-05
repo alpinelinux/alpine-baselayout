@@ -7,101 +7,152 @@ SFIC=`which sfic 2>/dev/null`
 COMMITED_TDB=/var/lib/apk/commited.tdb
 
 # search for a kernel argument
-get_karg () {
+get_kopt () {
 	for i in `cat /proc/cmdline` ; do
 		case $i in
-			$1=*) echo $i | sed 's|'$1'=||' ;;
+			$1=*) echo $i | sed 's|'$1'=||'
+			return 0
+			;;
         	esac
 	done
+	return 1
 }
 
 get_pkg_list() {
-	# we skip lines that start with '#'
-	grep -v '^#' $1 | while read pkg ; do
-		for i in $pkg ; do
-			echo -n "$pkg "
-		done
-	done 
+#	# we skip lines that start with '#'
+#	grep -v '^#' $1 | while read pkg ; do
+#		for i in $pkg ; do
+#			echo -n "$pkg "
+#		done
+#	done 
+	sed 's/\#.*//' $1
+}
+
+load_ovl() {
+	local dev mnt ovl f ovllist
+	dev=$1
+	mnt=$2
+	ovl=$3
+	[ -f $mnt/$ovl ] || return 1
+
+	ebegin "Reading overlay $dev:/$ovl"
+	# remember to remove leading /
+	ovllist=`tar -C / -zvxf $mnt/$ovl | sed 's:^/::'`
+	if [ "$ovllist" ] ; then
+		lbu update $ovllist 2>/dev/null
+		eend 0
+	else
+		eend 1
+	fi
 }
 
 # load packages from mounted media
 load_pkgs_and_config() {
 	# params:
-	#  $1 = path to mounted media
-	#  $2 = 
-	local apk_list mnt ovl allpkgs pkg
-	mnt=$1
-	apk_list="$mnt/packages.list"
-	if [ -f "$apk_list" ] ; then
-		echo "
-   Loading packages from $apk_list:"
+	#  $1 = device
+	#  $2 = path to mounted media
+	local pkgs pkglist flist mnt ovl allpkgs pkg ovlfile
+	mnt=$2
+
+	# get kernel opt pkg_list or use /packages.list
+	pkglist=`get_kopt pkg_list`
+	pkglist=${pkglist:-/packages.list}
+
+	mlist="$mnt/$pkglist"
+	if [ -f "$mlist" ] ; then
+		local line
+		ebegin "Loading packages from $dev:/$pkglist"
 		apk_fetch -u -q
-		for pkg in  `get_pkg_list $apk_list` ; do
-			apk_add -q $pkg
-			echo "     $pkg"
-		done 
+		pkgs=$( sed 's/\#.*//' $mlist )
+		for pkg in $pkgs ; do
+			apk_add -q $pkg && echo -n '.'
+		done
+		eend 0
 	fi
-	cd /	
+	cd /
+	ovlfile=$( get_kopt pkg_ovl )
 	# look for apk overlays.
-	for ovl in $mnt/*.apkovl.tar.gz ; do
-		if [ -f $ovl ] ; then
-			# remember to remove leading /
-			ovllist=`tar -C / -zvxf $ovl | sed 's:^/::'`
-			if [ "$ovllist" ] ; then
-				echo "   Reading overlay: $ovl"
-				lbu update $ovllist 2>/dev/null
-			fi
-		fi
+	for ovl in $mnt${ovlfile:-/*.apkovl.tar.gz} ; do
+		load_ovl $1 $mnt ${ovl#$mnt}
 	done
 }
 
-mount_once() {
-	if grep $1 < /proc/mounts >/dev/null 2>&1 ; then
-		NOUMOUNT=$1
-	else
-		mount $1 >/dev/null 2>&1
-	fi		
+# find where to install packages from
+set_apk_path() {
+	local dev fs mnt pref subdir
+	# if pkg_path is not specified as kernel arg, look for the packages 
+	# on mounted cdrom
+	APK_PATH=`get_kopt pkg_path`
+	APK_DEV=`get_kopt pkg_dev`
+
+	# return if pkg_dev is empty
+	if [ x"$APK_DEV" = x ] ; then
+		export APK_PATH	
+		return
+	fi
+
+	# split  dev:fs
+	dev=`echo $APK_DEV | cut -d: -f1`
+	fs=`echo $APK_DEV | cut -d: -f2`
+
+	# find mountpoint in fstab
+	mnt=$( awk '/^\/dev\/'$dev'/ { print $2 }' /etc/fstab )
+
+	# remove leading '/media/'. we assume the mount is in /media
+	prefix=${mnt#/media/}
+
+	# if there is no mountpoint in /media, then append one
+	if [ x"$prefix" = x"$mnt" ] || [ x"$mnt" = x ] ; then
+		prefix=$dev
+		echo -e "/dev/$dev\t/media/$prefix\t$fs\tnoauto\t0 0" >> /etc/fstab
+		mkdir -p /media/$prefix
+	fi
+
+	# construct the URI
+	subdir=`get_kopt pkg_subdir`
+	APK_PATH=$prefix:/${subdir:-/apks}
+
+	# read configs if available
+	[ -f /etc/apk.conf ] && . /etc/apk.conf
+	export APK_PATH
 }
 
-umount_once() {
-	[ "$NOUMOUNT" != "$1" ] && umount "$1" 2>/dev/null
-}
 
 start() {
-	ebegin "Searching for local configurations"
+	local cfgdevs  m
 	# just in case...
 	modprobe usb-storage 2>/dev/null
 	modprobe sd_mod 2>/dev/null
 	modprobe floppy 2>/dev/null
 	modprobe cdrom 2>/dev/null
+	
+	set_apk_path
 
-	# if pkg_path is not specified as kernel arg, look for the packages 
-	# on mounted cdrom
-	APK_PATH=`get_karg pkg_path`
+	cfgdevs=$( echo $( get_kopt cfg_dev ) | tr , ' ')
+	for m in ${cfgdevs:-cdrom:iso9660 fd0:vfat usba1:vfat}; do
+		local dev fs skip_umount mnt
 
-	# read configs if available
-	[ -f /etc/apk.conf ] && . /etc/apk.conf
+		# split 'dev:fs'
+		dev=${m%%:*}
+		fs=${m##*:}
 
-	[ -z "$APK_PATH" ] && APK_PATH="cdrom://apks"
-	export APK_PATH
+		# try to mount device on /mnt or abort
+		mnt=$( awk '$1 ~ /^\/dev\/'$dev'/ { print $2 }' /proc/mounts )
+		if [ x$mnt = x ] ; then
+			skip_umount=""
+			mount -t $fs -o ro /dev/$dev /mnt >/dev/null 2>&1 ||\
+				continue
+			mnt=/mnt
+		else
+			skip_umount=yes
+		fi
 
-	# APK_CFG_MOUNTS
-	# if set, will only try to mount those, other wise try everything 
-	# in /media/*
-	if [ "$APK_CFG_MOUNTS" ] ; then
-	mounts="$APK_CFG_MOUNTS"
-	else
-		mounts="*"
-	fi
+		# look for package listings and config overlays
+		load_pkgs_and_config $dev $mnt
 
-	cd /media
-	for m in $mounts ; do
-		mount_once /media/$m
-		load_pkgs_and_config /media/$m
-		sleep 1
-		umount_once /media/$m
+		# lazy unmount
+		[ x$skip_umount = xyes ] || umount -l $mnt
 	done
-	eend 
 
 	# if there are no /etc/apk.conf, create one
 	[ -f /etc/apk.conf ] || echo "APK_PATH=$APK_PATH" > /etc/apk.conf

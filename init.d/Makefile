@@ -1,6 +1,5 @@
 SCRIPTS = alpinecfg.sh \
 	bootmisc.sh \
-	bridge \
 	checkroot.sh \
 	coldplug \
 	cron \
