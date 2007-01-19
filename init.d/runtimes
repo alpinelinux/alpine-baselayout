@@ -28,16 +28,20 @@ get_pkg_list() {
 	sed 's/\#.*//' $1
 }
 
+preload_users_and_groups() {
+	tar -C / -zxf "$1" etc/passwd etc/group 2>/dev/null
+}
+
 load_ovl() {
-	local dev mnt ovl f ovllist
+	local dev mnt ovl f ovllist ovlfile
 	dev=$1
-	mnt=$2
-	ovl=$3
-	[ -f $mnt/$ovl ] || return 1
+	ovlfile="$2"
+	mnt=$(dirname "$2")
+	ovl=$(basename "$2")
 
 	ebegin "Reading overlay $dev:/$ovl"
 	# remember to remove leading /
-	ovllist=`tar -C / -zvxf $mnt/$ovl | sed 's:^/::'`
+	ovllist=`tar -C / -zvxf $ovlfile | sed 's:^/::'`
 	if [ "$ovllist" ] ; then
 		lbu update $ovllist 2>/dev/null
 		eend 0
@@ -46,14 +50,43 @@ load_ovl() {
 	fi
 }
 
-# load packages from mounted media
-load_pkgs_and_config() {
-	# params:
-	#  $1 = device
-	#  $2 = path to mounted media
-	local pkgs pkglist flist mnt ovl allpkgs pkg ovlfile
-	mnt=$2
+find_ovl() {
+	local mnt="$1"
+	local ovl
+	local lines
+	# first search kernel cmdline for "pkg_ovl"
+	ovl=$( get_kopt pkg_ovl )
+	if [ x"$ovl" != x ] ;then
+		echo "$ovl"
+		return 0
+	fi
 
+	# look for apkovl's on mounted media
+	ovl=$( ls -1 "$mnt"/*.apkovl.tar.gz 2>/dev/null ) || return 1
+	lines=$(echo "$ovl" | wc -l)
+
+	if [ $lines -gt 1 ] ; then
+		# output the last line only
+		ovl=$(echo "$ovl" | tail -n 1)
+		echo "Warning: more than one apkovl file was found. Only $ovl will be used." >&2
+	fi
+	echo "$ovl"
+}
+
+# read ahead so the packages are in cache when installed
+readahead_pkgs() {
+	local i pkgs
+	for i in $* ; do
+		pkgs="$pkgs $APK_PATH_MOUNTED/$i-[0-9]*"
+	done
+	readahead $pkgs 2>/dev/null &
+}
+	
+
+load_pkgs() {
+	local pkglist mlist pkg pkgs
+	local dev=$1
+	local mnt=$2
 	# get kernel opt pkg_list or use /packages.list
 	pkglist=`get_kopt pkg_list`
 	pkglist=${pkglist:-/packages.list}
@@ -64,17 +97,30 @@ load_pkgs_and_config() {
 		ebegin "Loading packages from $dev:/$pkglist"
 		apk_fetch -u -q
 		pkgs=$( sed 's/\#.*//' $mlist )
+		readahead_pkgs $pkgs
 		for pkg in $pkgs ; do
 			apk_add -q $pkg && echo -n '.'
 		done
 		eend 0
 	fi
+}
+
+# load packages from mounted media
+load_pkgs_and_config() {
+	# params:
+	#  $1 = device
+	#  $2 = path to mounted media
+	local ovlfile
+	local mnt=$2
+	local dev=$1
+
 	cd /
-	ovlfile=$( get_kopt pkg_ovl )
 	# look for apk overlays.
-	for ovl in $mnt${ovlfile:-/*.apkovl.tar.gz} ; do
-		load_ovl $1 $mnt ${ovl#$mnt}
-	done
+	ovlfile=$( find_ovl "$mnt" ) || return 1
+
+	preload_users_and_groups $ovlfile
+	load_pkgs $dev $mnt
+	load_ovl $dev $ovlfile
 }
 
 # find where to install packages from
@@ -115,6 +161,8 @@ set_apk_path() {
 	# read configs if available
 	[ -f /etc/apk.conf ] && . /etc/apk.conf
 	export APK_PATH
+	export APK_PATH_MOUNTED=/media/$prefix/$subdir
+
 }
 
 

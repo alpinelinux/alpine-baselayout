@@ -2,24 +2,13 @@
 CC = gcc
 LD = gcc
 
-#BIN_TARGETS = splashbard
-#SBIN_TARGETS = runscript start-stop-daemon
-SBIN_TARGETS = runscript
+SBIN_TARGETS = runscript readahead
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS)
 
 .PHONY: all clean
 all: $(TARGET)
 
-tsplashd: splashbard.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
-
-readahead: readahead.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
-
-runscript: runscript.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
-
-start-stop-daemon: start-stop-daemon.c
+%: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 clean:
