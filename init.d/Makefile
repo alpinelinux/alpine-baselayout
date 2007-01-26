@@ -17,6 +17,7 @@ SCRIPTS = alpinecfg.sh \
 	rcL \
 	rcS \
 	runtimes \
+	swap\
 	syslog \
 	tuntap \
 	udev \
