@@ -1,7 +1,7 @@
 #!/bin/sh
 
 myscript="$1"
-if [ -L $1 ] ; then
+if [ -L $1 ] && [ ! -L "/etc/init.d/${1##*/}" ]; then
 	myservice=$(readlink "$1")
 else
 	myservice=$1
