@@ -22,6 +22,7 @@ SCRIPTS = alpinecfg.sh \
 	tuntap \
 	udev \
 	udhcpc \
+	vlan \
 	watchdog
 
 all:

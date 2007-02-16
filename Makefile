@@ -1,18 +1,22 @@
-VERSION=1.3_alpha
-PV = alpine-baselayout-$(VERSION)
-TARBALL = $(PV).tar.gz
+VERSION=1.3_alpha4
 
-SUBDIRS = src init.d
+PV 		=alpine-baselayout-$(VERSION)
+TARBALL 	=$(PV).tar.gz
+SUBDIRS 	=src init.d
 
-GENERATED_FILES = TZ hosts profile
-ETC_FILES = $(GENERATED_FILES) group fstab inittab nsswitch.conf passwd protocols services shadow shells issue mdev.conf crontab sysctl.conf
-CONFD_FILES = $(addprefix conf.d/, cron localinit tuntap watchdog)
-SBIN_FILES = runscript-alpine.sh functions.sh rc_add rc_delete rc_status
-RC_SH_FILES = rc-services.sh
-UDHCPC_FILES = default.script 
-LIB_MDEV_FILES = ide_links sd_links subdir_dev usbdev
-CRONTABS = crontab
-DISTFILES = $(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES) $(LIB_MDEV_FILES) Makefile
+GENERATED_FILES =TZ hosts profile
+ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
+		passwd protocols services shadow shells issue mdev.conf \
+		crontab sysctl.conf modprobe.conf
+CONFD_FILES = $(addprefix conf.d/, cron localinit tuntap vlan watchdog)
+SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
+		modules-update
+RC_SH_FILES 	=rc-services.sh
+UDHCPC_FILES 	=default.script 
+LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev
+CRONTABS 	=crontab
+DISTFILES 	=$(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES)\
+		$(LIB_MDEV_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \

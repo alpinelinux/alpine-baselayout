@@ -5,6 +5,7 @@
 
 SFIC=`which sfic 2>/dev/null`
 COMMITED_TDB=/var/lib/apk/commited.tdb
+TMP=/tmp/init.d-runtimes
 
 # search for a kernel argument
 get_kopt () {
@@ -32,21 +33,23 @@ preload_users_and_groups() {
 	tar -C / -zxf "$1" etc/passwd etc/group 2>/dev/null
 }
 
-load_ovl() {
+# merge the unpacked config
+merge_config() {
 	local dev mnt ovl f ovllist ovlfile
 	dev=$1
 	ovlfile="$2"
 	mnt=$(dirname "$2")
 	ovl=$(basename "$2")
 
-	ebegin "Reading overlay $dev:/$ovl"
+	cp -ar $TMP/* /
+
 	# remember to remove leading /
-	ovllist=`tar -C / -zvxf $ovlfile | sed 's:^/::'`
+	ovllist=`find $TMP/* | sed "s:^$TMP/::"`
 	if [ "$ovllist" ] ; then
 		lbu update $ovllist 2>/dev/null
-		eend 0
+		return 0
 	else
-		eend 1
+		return 1
 	fi
 }
 
@@ -82,6 +85,17 @@ readahead_pkgs() {
 	readahead $pkgs 2>/dev/null &
 }
 	
+load_pkgs_from_list() {
+	local list="$1"
+	local prompt="$2"
+	local pkgs pkg
+	apk_fetch -u -q
+	pkgs=$( sed 's/\#.*//' "$list" )
+	readahead_pkgs $pkgs
+	for pkg in $pkgs ; do
+		apk_add -q $pkg && echo -n '.'
+	done
+}
 
 load_pkgs() {
 	local pkglist mlist pkg pkgs
@@ -89,19 +103,25 @@ load_pkgs() {
 	local mnt=$2
 	# get kernel opt pkg_list or use /packages.list
 	pkglist=`get_kopt pkg_list`
+	# here we should issue a warning in future versions if found on cmdline
 	pkglist=${pkglist:-/packages.list}
 
 	mlist="$mnt/$pkglist"
-	if [ -f "$mlist" ] ; then
-		local line
-		ebegin "Loading packages from $dev:/$pkglist"
-		apk_fetch -u -q
-		pkgs=$( sed 's/\#.*//' $mlist )
-		readahead_pkgs $pkgs
-		for pkg in $pkgs ; do
-			apk_add -q $pkg && echo -n '.'
-		done
-		eend 0
+	wlist="$TMP/var/lib/apk/world"
+	if [ -f "$wlist" ] ; then
+		load_pkgs_from_list "$wlist"
+		# its re-generated
+		rm -rf "$wlist"
+	elif [ -f "$mlist" ] ; then
+		#ok, we are upgrading...
+		local line i
+		load_pkgs_from_list "$mlist"
+		# lets clean up the world file
+		for i in $(apk_glob '*') ; do
+			reqby=$(apk_info -qr $i);
+			# only add the packages who has no REQUIRED_BY
+			[ -z "$reqby" ] && echo $i
+		done | sed 's/-[0-9].*//' > /var/lib/apk/world		
 	fi
 }
 
@@ -118,9 +138,27 @@ load_pkgs_and_config() {
 	# look for apk overlays.
 	ovlfile=$( find_ovl "$mnt" ) || return 1
 
-	preload_users_and_groups $ovlfile
+	ebegin "Loading setup from $dev://$(basename $ovlfile)"
+	# unpack the ovl
+	mkdir -p "$TMP"
+	if ! tar -C "$TMP" -zxf "$ovlfile" ; then
+		eend $?
+		return
+	fi
+
+	# copy the passwd file
+	[ -f "$TMP/etc/passwd" ] && cp $TMP/etc/passwd /etc
+	[ -f "$TMP/etc/group" ] && cp $TMP/etc/group /etc
+
+	# install the packages
 	load_pkgs $dev $mnt
-	load_ovl $dev $ovlfile
+
+	# copy the config
+	merge_config
+	eend $?
+
+	# clean up
+	rm -rf "$TMP"
 }
 
 # find where to install packages from
@@ -159,7 +197,7 @@ set_apk_path() {
 	APK_PATH=$prefix:/${subdir:-/apks}
 
 	# read configs if available
-	[ -f /etc/apk.conf ] && . /etc/apk.conf
+	[ -f /etc/apk/apk.conf ] && . /etc/apk/apk.conf
 	export APK_PATH
 	export APK_PATH_MOUNTED=/media/$prefix/$subdir
 
@@ -202,7 +240,10 @@ start() {
 		[ x$skip_umount = xyes ] || umount -l $mnt
 	done
 
-	# if there are no /etc/apk.conf, create one
-	[ -f /etc/apk.conf ] || echo "APK_PATH=$APK_PATH" > /etc/apk.conf
+	# if there are no /etc/apk/apk.conf, create one
+	if ! [ -f /etc/apk/apk.conf ] ; then
+		mkdir -p /etc/apk
+		echo "APK_PATH=$APK_PATH" > /etc/apk/apk.conf
+	fi
 }
 
