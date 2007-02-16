@@ -1,0 +1,28 @@
+# vlan configuration
+
+# NAME_TYPE (set_name_type) can be on of:
+#  VLAN_PLUS_VID (vlan0005), VLAN_PLUS_VID_NO_PAD (vlan5),
+#  DEV_PLUS_VID (eth0.0005), DEV_PLUS_VID_NO_PAD (eth0.5)
+#
+NAME_TYPE="DEV_PLUS_VID_NO_PAD"
+
+# specify VLANS  as: interface-name.vlan-id
+# for example: eth0.1 eth1.4
+#
+#VLANS="eth0.1 eth1.4"
+VLANS=""
+
+# Set the egress and ingress maps (set_egress_map, set_ingress_map) in 
+# the following format:
+#   vlan-name=skb_priority[:vlan_qos]
+#
+# EGRESS_MAP="vlan1=2:3 vlan2=3:4"
+#
+EGRESS_MAP=""
+INGRESS_MAP=""
+
+# Reorder the ethernet header on specified vlans. (set_flag 1)
+# REORDER_HDR="vlan1 vlan2"
+
+REORDER_HDR=""
+

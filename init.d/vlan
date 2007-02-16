@@ -1,0 +1,65 @@
+#!/sbin/runscript
+
+VCONF=`which vconfig 2>/dev/null` || exit
+
+# set egress_map or ingress_map.
+# $1 = egress | ingress
+# $2 ...  = vlan params
+set_map() {
+	local i type=$1
+	shift
+	for i in $* ; do
+		local dev param skb qos
+		dev=${i%=*}
+		param=${i#*=}
+		skb_prio=${param%:*}
+		qos=${param#$skb_prio}
+		qos=${qos#:}
+		$VCONF set_${type}_map $dev $skb_prio $qos >/dev/null
+	done
+}
+
+start() {
+	modprobe 8021q 2>/dev/null
+
+	# set nametype before creating the vlan's
+	[ x$NAME_TYPE != x ] && $VCONF set_name_type "$NAME_TYPE" >/dev/null
+
+	# create the vlans
+	for vlan in $VLANS; do
+		retcode=0
+		iface=${vlan%.*}
+		vlan_id=${vlan#*.}
+		ebegin "Setting up vlan $vlan"
+		if [ -z "$VCONF" ] ; then
+			eerror "Need vconfig to be able to set up $vlan"
+			retcode=1
+		else
+			ip link set $iface up
+			$VCONF add $iface $vlan_id >/dev/null
+			retcode=$?
+		fi
+		eend $retcode
+	done
+
+	# set the egress_map and ingress_map
+	set_map "egress" $EGRESS_MAP
+	set_map "ingress" $INGRESS_MAP
+
+	# set the reorder header
+	for vlan in $REORDER_HDR ; do
+		$VCONF set_flag $vlan 1 >/dev/null
+	done
+}
+
+stop() {
+	# remove all vlans
+	local vlan
+	for vlan in `awk '{ print $1 }' /proc/net/vlan/config`; do
+		if [ -f /proc/net/vlan/$vlan ] ; then
+			ebegin "Removing vlan $vlan"
+			$VCONF rem $vlan >/dev/null
+			eend $?
+		fi
+	done
+}
