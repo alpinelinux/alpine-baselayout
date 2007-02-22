@@ -1,4 +1,4 @@
-VERSION=1.3_alpha5
+VERSION=1.3_alpha6
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz

@@ -16,6 +16,7 @@ SCRIPTS = alpinecfg.sh \
 	rcK \
 	rcL \
 	rcS \
+	rdate\
 	runtimes \
 	swap\
 	syslog \
