@@ -21,7 +21,6 @@ SCRIPTS = alpinecfg.sh \
 	swap\
 	syslog \
 	tuntap \
-	udev \
 	udhcpc \
 	vlan \
 	watchdog
