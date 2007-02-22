@@ -8,7 +8,7 @@ GENERATED_FILES =TZ hosts profile
 ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
 		passwd protocols services shadow shells issue mdev.conf \
 		crontab sysctl.conf modprobe.conf
-CONFD_FILES = $(addprefix conf.d/, cron localinit tuntap vlan watchdog)
+CONFD_FILES = $(addprefix conf.d/, cron localinit rdate tuntap vlan watchdog)
 SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
 		modules-update
 RC_SH_FILES 	=rc-services.sh
