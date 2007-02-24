@@ -111,10 +111,10 @@ load_pkgs() {
 	# future.
 	mlist="$mnt/$pkglist"
 	wlist="$TMP/var/lib/apk/world"
-	plist="$TMP/etc/lib/packages.list"
+	plist="$TMP/etc/lbu/packages.list"
 
-	[ -f "$plilst" ] && wlist="$plist"
-	elif [ -f "$wlist" ] ; then
+	[ -f "$plist" ] && wlist="$plist"
+	if [ -f "$wlist" ] ; then
 		load_pkgs_from_list "$wlist"
 		# its re-generated
 		rm -rf "$wlist"
@@ -226,7 +226,7 @@ start() {
 	set_apk_path
 
 	cfgdevs=$( echo $( get_kopt cfg_dev ) | tr , ' ')
-	for m in ${cfgdevs:-cdrom:iso9660 fd0:vfat usba1:vfat}; do
+	for m in ${cfgdevs:-usba1:vfat fd0:vfat cdrom:iso9660}; do
 		local dev fs skip_umount mnt loaded
 
 		# split 'dev:fs'
@@ -248,8 +248,8 @@ start() {
 		load_pkgs_and_config $dev $mnt && loaded=yes
 
 		# lazy unmount
-		[ x$skip_umount = xyes ] || umount -l $mnt
-		[ x$loaded=xyes ] && break
+		[ "$skip_umount" = yes ] || umount -l $mnt
+		[ "$loaded" = yes ] && break
 	done
 
 	# if there are no /etc/apk/apk.conf, create one

@@ -7,6 +7,6 @@ if [ "$ACTION" = remove ] ; then
 	rmdir $1 2>/dev/null
 else
 	mkdir -p $1 
-	mv $MDEV $1
+	mv $MDEV $1/$2
 fi
-	
+
