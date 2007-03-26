@@ -2,7 +2,7 @@
 CC = gcc
 LD = gcc
 
-SBIN_TARGETS = runscript readahead
+SBIN_TARGETS = runscript readahead cttyhack
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS)
 
 .PHONY: all clean

@@ -52,7 +52,7 @@ while [ $# -gt 0 ] ; do
 	for rcl in $ROOT/etc/rcS.d/[S][0-9][0-9]$SCRIPT \
 		$ROOT/etc/rcL.d/[SK][0-9][0-9]$SCRIPT \
 		$ROOT/etc/rcK.d/[SK][0-9][0-9]$SCRIPT ; do
-		[ -e "$rcl" ] || continue
+		[ -e "$rcl" -o -L "$rcl" ] || continue
 		echo "$rcl"
 		rclinks="$rclinks $rcl"
 	done

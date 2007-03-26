@@ -2,8 +2,8 @@
 
 # we need the proc to be able to install busybox
 /bin/busybox mkdir -p /proc /usr/sbin /sys
-/bin/busybox mount -t proc proc /proc
-/bin/busybox mount -t sysfs none /sys
+/bin/busybox mount -t proc -o noexec,nosuid,nodev proc /proc
+/bin/busybox mount -t sysfs -o noexec,nosuid,nodev sysfs /sys
 
 # install busybox links
 /bin/busybox --install -s
