@@ -214,6 +214,35 @@ set_apk_path() {
 
 }
 
+# mount dev $2 with type $1 on /mnt
+mount_dev() {
+	local fs=$1
+	local dev=$2
+	local i mountok
+
+	# special handling for usb devices
+	case $dev in
+		usb*) 	# check for attatched devices
+			if grep usb-storage /sys/class/scsi_host/host*/proc_name >/dev/null 2>&1 ; then
+				ebegin "Waiting for usb-storage"
+				for i in $(seq 0 9); do
+					if mount -t $fs -o ro /dev/$dev /mnt >/dev/null 2>&1; then
+						eend 0
+						return 0
+					else
+						echo -n "."
+						sleep 2
+					fi
+				done
+				eend 1
+				return 1 # timed out...
+			fi
+			;;
+	esac
+	# not usb, just try to mount as normal
+	mount -t $fs -o ro /dev/$dev /mnt >/dev/null 2>&1
+	return
+}
 
 start() {
 	local cfgdevs  m
@@ -237,8 +266,7 @@ start() {
 		mnt=$( awk '$1 ~ /^\/dev\/'$dev'/ { print $2 }' /proc/mounts )
 		if [ x$mnt = x ] ; then
 			skip_umount=""
-			mount -t $fs -o ro /dev/$dev /mnt >/dev/null 2>&1 ||\
-				continue
+			mount_dev $fs $dev || continue
 			mnt=/mnt
 		else
 			skip_umount=yes
