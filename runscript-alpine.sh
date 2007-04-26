@@ -53,6 +53,29 @@ usage() {
 	exit $1
 }		
 
+# imported from gentoo 
+get_bootparam() {
+	local match="$1"
+	[ -z "${match}" -o ! -r /proc/cmdline ] && return 1
+
+	set -- $(cat /proc/cmdline)
+	while [ -n "$1" ] ; do
+		case "$1" in
+			gentoo=*)
+				local params="${1##*=}"
+				local IFS=, x=
+				for x in ${params} ; do
+					[ "${x}" = "${match}" ] && return 0
+				done
+				;;
+		esac
+		shift
+	done
+
+	return 1
+}
+
+
 [ -f "/etc/conf.d/$myservice" ] && . "/etc/conf.d/$myservice"
 . "$myscript"
 

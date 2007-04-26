@@ -1,0 +1,41 @@
+SEND-PR: -*- send-pr -*-
+SEND-PR: Lines starting with `SEND-PR' will be removed automatically, as
+SEND-PR: will all comments (text enclosed in `<' and `>').
+SEND-PR: 
+SEND-PR: Please consult the following URL if you are not sure how to
+SEND-PR: fill out a problem report:
+SEND-PR: http://www.alpinelinux.org/mediawiki/index.php/Problem_Report
+SEND-PR:
+SEND-PR: Note that the Synopis field is mandatory..
+SEND-PR:
+SEND-PR: Choose from the following categories:
+SEND-PR:
+SEND-PR: acf         base        alpine-conf apk-tools   aports
+SEND-PR: doc         misc        test        website     
+SEND-PR:
+To: bugs@dev.alpinelinux.org
+From: <FROM>
+Reply-To: <REPLYTO>
+X-send-pr-version: 4.1.0
+
+
+>Submitter-Id: <SUBMITTER>
+>Notify-List:  <Addresses to notify of significant PR changes (one line)>
+>Originator:   <DEFAULT_ORIGINATOR>
+>Organization: <Organisation if any>
+>Synopsis:     <One-line summary of the PR (one line)>
+>Confidential: no <Alpine Linux PRs are public data>
+>Severity:     <[ critical | serious | non-critical ] (one line)>
+>Priority:     <[ high | medium | low ] (one line)>
+>Category:     <choose from a category listed above (one line)>
+>Class:        <[ sw-bug | doc-bug | change-request ] (one line)>
+>Release:      <ALPINE_RELEASE>
+>Environment:  
+	System: <SYSTEM>
+
+>Description:  
+	<Precise description of the problem (multiple lines)>
+>How-To-Repeat:
+	<Code/input/activities to reproduce the problem (multiple lines)>
+>Fix:          
+	<How to correct or work around the problem, if known (multiple lines)>
