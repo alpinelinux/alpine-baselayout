@@ -1,4 +1,4 @@
-VERSION=1.3
+VERSION=1.3.1
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -38,7 +38,7 @@ hostname:
 	echo localhost > hostname
 
 hosts:
-	echo -e "127.0.0.1\tlocalhost" > hosts
+	echo "127.0.0.1	localhost" > hosts
 
 profile:
 	echo "export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin" > $@
