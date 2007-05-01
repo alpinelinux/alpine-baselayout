@@ -10,10 +10,14 @@ SEND-PR: Note that the Synopis field is mandatory..
 SEND-PR:
 SEND-PR: Choose from the following categories:
 SEND-PR:
-SEND-PR: acf         base        alpine-conf apk-tools   aports
-SEND-PR: doc         misc        test        website     
+SEND-PR: 	acf         
+SEND-PR:	base        
+SEND-PR:	aports      
+SEND-PR:	doc
+SEND-PR:	misc
+SEND-PR:	hosting
 SEND-PR:
-To: bugs@dev.alpinelinux.org
+To: bugs@alpinelinux.org
 From: <FROM>
 Reply-To: <REPLYTO>
 X-send-pr-version: 4.1.0
