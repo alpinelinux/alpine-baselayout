@@ -40,11 +40,6 @@ for i in $(cat /sys/class/net/bonding_masters) ; do
 done
 [ "$found" != 1 ] && die "$bondif is not a bonding master. Aborting"
 
-# check that $bondif is up
-if [ "$(cat /sys/class/net/$bondif/operstate)" != "up" ] ; then
-	die "The specified master interface '$bondif' is not up"
-fi
-
 while [ $# -gt 0 ] ; do
 	if [ "$OPER" = "+" ] && [ -d /sys/class/net/$1/master ] ; then
 		echo "Interface '$1' is already a slave. Skipping" >&2
