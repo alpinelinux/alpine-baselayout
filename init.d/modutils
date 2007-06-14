@@ -3,11 +3,7 @@
 PATH="/sbin:/bin:/usr/bin:/usr/bin"
 
 start() {
-#[ -e /sbin/depmod ] || exit 0
-#echo -n "Calculating module dependencies... "
-#depmod -a > /dev/null
-#echo "done."
-
+	modules-update
 	if [ -f /etc/modules ] ; then
 		sed 's/\#.*//g' < /etc/modules |
 		while read module args

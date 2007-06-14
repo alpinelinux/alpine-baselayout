@@ -1,4 +1,4 @@
-VERSION=1.3.2
+VERSION=1.4.1
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -10,7 +10,7 @@ ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
 		crontab sysctl.conf modprobe.conf
 CONFD_FILES = $(addprefix conf.d/, cron localinit rdate tuntap vlan watchdog)
 SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
-		modules-update
+		modules-update ifenslave
 RC_SH_FILES 	=rc-services.sh
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev

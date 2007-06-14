@@ -1,0 +1,64 @@
+#!/bin/sh
+
+PROGRAM=$(basename $0)
+
+die() {
+	echo $* >&2
+	exit 1
+}
+
+usage() {
+	echo "Usage: $PROGRAM [-d] <master-if> <slave-if> ...
+
+Options:
+ -d	Detach slaves
+
+"
+	exit 1
+}
+
+		
+OPER='+'
+while getopts "dh" opt ; do
+	case $opt in
+		d) OPER="-";;
+		h) usage;;
+	esac
+done
+
+shift $(( $OPTIND - 1 ))
+
+[ $# -lt 2 ] && usage
+
+bondif=$1
+shift
+
+#check if $bondif is a bonding master
+unset found
+for i in $(cat /sys/class/net/bonding_masters) ; do
+	[ "$i" = "$bondif" ] &&	found=1
+done
+[ "$found" != 1 ] && die "$bondif is not a bonding master. Aborting"
+
+# check that $bondif is up
+if [ "$(cat /sys/class/net/$bondif/operstate)" != "up" ] ; then
+	die "The specified master interface '$bondif' is not up"
+fi
+
+while [ $# -gt 0 ] ; do
+	if [ "$OPER" = "+" ] && [ -d /sys/class/net/$1/master ] ; then
+		echo "Interface '$1' is already a slave. Skipping" >&2
+	elif [ -d /sys/class/net/$1 ]; then
+		# flush ip adresses and set link down before adding
+		if [ "$OPER" = '+' ]; then
+			ip addr flush dev $1 >/dev/null 2>&1
+			ip link set dev $1 down #linux will bring link up
+		fi
+		( echo "${OPER}${1}" > /sys/class/net/$bondif/bonding/slaves ) >/dev/null \
+			|| echo "Slave '$1' failed. Skipping" >&2
+	else
+		echo "Slave '$1' is not a network interface. Skipping" >&2
+	fi
+	shift
+done
+
