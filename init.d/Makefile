@@ -1,5 +1,6 @@
 SCRIPTS = alpinecfg.sh \
 	bootmisc.sh \
+	checkfs \
 	checkroot.sh \
 	coldplug \
 	cron \
@@ -8,9 +9,9 @@ SCRIPTS = alpinecfg.sh \
 	hwdrivers \
 	inetd \
 	localinit \
+	localmount \
 	mdev \
 	modutils \
-	mountall \
 	networking \
 	procps \
 	rcK \
@@ -21,7 +22,6 @@ SCRIPTS = alpinecfg.sh \
 	swap\
 	syslog \
 	tuntap \
-	udhcpc \
 	vlan \
 	watchdog
 

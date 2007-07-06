@@ -1,0 +1,56 @@
+#!/sbin/runscript
+# Copyright 1999-2007 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+get_bootparam() {
+	# todo
+	return 1
+}
+
+start() {
+	local rc=0 mode="-p" opts="-A -C0 -R -T" parts=
+
+	ebegin "Checking all filesystems"
+
+	if  [ -e /forcefsck ] || get_bootparam "forcefsck" ; then
+		ewarn "A full fsck has been forced"
+		mode="-f -n"
+	fi
+
+	fsck ${opts} ${mode} ${parts}
+	rc=$?
+	
+	if [ ${rc} -eq 0 ] ; then
+		eend 0
+	elif [ ${rc} -eq 1 ] ; then
+		ewend 1 "Filesystem errors corrected."
+		rc=0
+	elif [ ${rc} -eq 2 ] ; then
+		ewend 1 "System should be rebooted"
+	elif [ ${rc} -eq 8 ] ; then
+		ewend 1 "Operational error, continuing"
+		rc=0
+	else
+		if [ "${RC_FORCE_AUTO}" = "yes" ] ; then
+			eend 2 "Fsck could not correct all errors, rerunning"
+			fsck ${opts} -y ${parts}
+			retval=$?
+			eend ${retval}
+		fi
+
+		if [ ${retval} -gt 3 ] ; then
+			eend 2 "Fsck could not correct all errors, manual repair needed"
+#			exec rc-abort || exit 1
+		fi
+	fi
+
+	[ ${rc} = 0 -a -e /forcefsck ] && rm /forcefsck
+
+	return ${rc}
+}
+
+stop() {
+	return 0
+}
+
+# vim: set ts=4 :
