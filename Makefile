@@ -1,4 +1,4 @@
-VERSION=1.5.0
+VERSION=1.5.1
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -8,7 +8,7 @@ GENERATED_FILES =TZ hosts profile
 ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
 		passwd protocols services shadow shells issue mdev.conf \
 		crontab sysctl.conf modprobe.conf
-CONFD_FILES = $(addprefix conf.d/, cron localinit rdate tuntap vlan watchdog)
+CONFD_FILES = $(addprefix conf.d/, cron localinit rdate syslog tuntap vlan watchdog)
 SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
 		modules-update ifenslave
 RC_SH_FILES 	=rc-services.sh

@@ -2,12 +2,14 @@
 
 start() {
 	ebegin "Starting system logging"
-	syslogd && klogd
+	klogd ${KLOGD_OPTS}
+	syslogd ${SYSLOGD_OPTS}
 	eend $?
 }
 
 stop () {
 	ebegin "Stopping system logging"
-	killall klogd && killall syslogd
+	killall klogd
+	killall syslogd
 	eend $?
 }
