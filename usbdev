@@ -4,12 +4,12 @@
 case "$ACTION" in
 	add|"")
 		for i in /sys/class/usb_device/$MDEV/device/*/modalias ; do
-			modprobe `cat $i` 2>/dev/null
+			[ -r "$i" ] && modprobe `cat $i` 2>/dev/null
 		done
 		;;
 	remove)
 		for i in /sys/class/usb_device/$MDEV/device/*/modalias ; do
-			modprobe -r `cat $i` 2>/dev/null
+			[ -r "$i" ] && modprobe -r `cat $i` 2>/dev/null
 		done
 esac
 
