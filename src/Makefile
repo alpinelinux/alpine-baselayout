@@ -21,8 +21,8 @@ clean:
 install: $(TARGET)
 	install -m 0755 -d $(DESTDIR)/bin
 	install -m 0755 -d $(DESTDIR)/sbin
-#	install -m 0755 -d $(DESTDIR)/usr
-#	install -m 0755 -d $(DESTDIR)/usr/bin
-#	install -m 0755 $(USR_BIN_TARGETS) $(DESTDIR)/usr/bin
+	install -m 0755 -d $(DESTDIR)/usr
+	install -m 0755 -d $(DESTDIR)/usr/bin
+	install -m 0755 $(USR_BIN_TARGETS) $(DESTDIR)/usr/bin
 	install -m 0755 $(SBIN_TARGETS) $(DESTDIR)/sbin
 

@@ -28,12 +28,16 @@
 #include "atomicio.h"
 #include "lib.h"
 
-#define _PATH_DMESG "/var/run/dmesg.boot"
+#ifndef _PATH_DMESG
+#define _PATH_DMESG "/var/log/dmesg"
+#endif
+#define _DEFAULT_CONFIG "/etc/sendbug/sendbug.conf"
 
 int	checkfile(const char *);
 void	dmesg(FILE *);
 int	editit(const char *);
 void	init(void);
+static void	read_config(const char *);
 int	matchline(const char *, const char *, size_t);
 int	prompt(void);
 int	send_file(const char *, int);
@@ -42,13 +46,14 @@ void	template(FILE *);
 
 const char *categories = "acf aports base doc misc hosting";
 char *version = "4.2";
+const char *config_file;
 
 struct passwd *pw;
 //char os[BUFSIZ], rel[BUFSIZ], 
 char release[BUFSIZ]; 
 //char details[BUFSIZ];
 struct utsname uts;
-char *fullname, *tmppath;
+char *fullname, *tmppath, *pr_form, *mailfrom, *mailto;
 int Dflag, wantcleanup;
 
 static void
@@ -56,7 +61,7 @@ usage(void)
 {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s [-DLPV]\n", __progname);
+	fprintf(stderr, "usage: %s [-DLPV] [-c config]\n", __progname);
 	exit(1);
 }
 
@@ -74,12 +79,15 @@ main(int argc, char *argv[])
 	int ch, c, fd, ret = 1;
 	const char *tmpdir;
 	struct stat sb;
-	char *pr_form;
 	time_t mtime;
 	FILE *fp;
 
-	while ((ch = getopt(argc, argv, "DLPV")) != -1)
+	config_file = NULL;
+	while ((ch = getopt(argc, argv, "c:DLPV")) != -1)
 		switch (ch) {
+		case 'c':
+			config_file = optarg;
+			break;
 		case 'D':
 			Dflag = 1;
 			break;
@@ -117,7 +125,8 @@ main(int argc, char *argv[])
 
 	init();
 
-	pr_form = getenv("PR_FORM");
+	if (pr_form == NULL)
+		pr_form = getenv("PR_FORM");
 	if (pr_form) {
 		char buf[BUFSIZ];
 		size_t len;
@@ -340,6 +349,58 @@ static void readfile(const char *filename, char *buf, size_t size)
 	return;
 }
 
+static void *xmalloc(size_t size)
+{
+	void *ptr;
+	ptr = malloc(size);
+	if (ptr == NULL)
+		err(1, "malloc");
+	return ptr;
+}
+
+static char *xstrdup(const char *str)
+{
+	char *p;
+	p = strdup(str);
+	if (p == NULL)
+		err(1, "strdup");
+	return p;
+}
+
+static void read_config(const char *filename)
+{
+	FILE *fh;
+	char *line = xmalloc(4096);
+
+	fh = fopen(filename, "r");
+	if (fh == NULL) 
+		err(1, filename);
+	while (fgets(line, 4095, fh) != NULL) {
+		char *p;
+		/* strip comments and newline */
+		p = strpbrk(line, "#\n");
+		if (p) *p = '\0';
+
+		/* find keyword */
+		p = strchr(line, '=');
+		if (p == NULL)
+			continue;
+		*p++ = '\0';
+	
+		/* pr_form, editor, mailfrom, */
+		if (strcmp(line, "form") == 0) {
+			pr_form = xstrdup(p);
+		} else if (strcmp(line, "mailfrom") == 0) {
+			mailfrom = xstrdup(p);
+		} else if (strcmp(line, "mailto") == 0) {
+			mailto = xstrdup(p);
+		} else 
+			warn("ignoring unknown keyword: %s", line);
+	}
+	fclose(fh);		
+	free(line);
+}
+
 void
 init(void)
 {
@@ -347,60 +408,61 @@ init(void)
 	int sysname[2];
 	char ch, *cp;
 
+	if (config_file == NULL)
+		config_file = getenv("SENDBUG_CONF");
+	if (config_file)
+		read_config(config_file);
+
 	if ((pw = getpwuid(getuid())) == NULL)
 		err(1, "getpwuid");
-	namelen = strlen(pw->pw_name);
+	if (fullname == NULL) {
+		namelen = strlen(pw->pw_name);
 
-	/* Count number of '&'. */
-	for (amp = 0, cp = pw->pw_gecos; *cp && *cp != ','; ++cp)
-		if (*cp == '&')
-			++amp;
+		/* Count number of '&'. */
+		for (amp = 0, cp = pw->pw_gecos; *cp && *cp != ','; ++cp)
+			if (*cp == '&')
+				++amp;
 
-	/* Truncate gecos to full name. */
-	gecoslen = cp - pw->pw_gecos;
-	pw->pw_gecos[gecoslen] = '\0';
+		/* Truncate gecos to full name. */
+		gecoslen = cp - pw->pw_gecos;
+		pw->pw_gecos[gecoslen] = '\0';
 
-	/* Expanded str = orig str - '&' chars + concatenated logins. */
-	len = gecoslen - amp + (amp * namelen) + 1;
-	if ((fullname = malloc(len)) == NULL)
-		err(1, "malloc");
+		/* Expanded str = orig str - '&' chars + concatenated logins. */
+		len = gecoslen - amp + (amp * namelen) + 1;
+		fullname = xmalloc(len);
 
-	/* Upper case first char of login. */
-	ch = pw->pw_name[0];
-	pw->pw_name[0] = toupper((unsigned char)pw->pw_name[0]);
+		/* Upper case first char of login. */
+		ch = pw->pw_name[0];
+		pw->pw_name[0] = toupper((unsigned char)pw->pw_name[0]);
 
-	cp = pw->pw_gecos;
-	fullname[0] = '\0';
-	while (cp != NULL) {
-		char *token;
+		cp = pw->pw_gecos;
+		fullname[0] = '\0';
+		while (cp != NULL) {
+			char *token;
 
-		token = strsep(&cp, "&");
-		if (token != pw->pw_gecos &&
-		    strlcat(fullname, pw->pw_name, len) >= len)
-			errx(1, "truncated string");
-		if (strlcat(fullname, token, len) >= len)
-			errx(1, "truncated string");
+			token = strsep(&cp, "&");
+			if (token != pw->pw_gecos &&
+			    strlcat(fullname, pw->pw_name, len) >= len)
+				errx(1, "truncated string");
+			if (strlcat(fullname, token, len) >= len)
+				errx(1, "truncated string");
+		}
+
+		/* Restore case of first char of login. */
+		pw->pw_name[0] = ch;
 	}
-	/* Restore case of first char of login. */
-	pw->pw_name[0] = ch;
+	
+	if (mailfrom == NULL)
+		mailfrom = getenv("PR_MAILFROM");
+	if (mailfrom == NULL)
+		mailfrom = pw->pw_name;
+
+	if (mailto == NULL)
+		mailto = getenv("PR_MAILTO");
+	if (mailto == NULL)
+		mailto = "bugs@alpinelinux.org";
 
 	uname(&uts);
-
-/*
-	readfile("/proc/sys/kernel/ostype", os, sizeof(os)-1);
-	readfile("/proc/sys/kernel/osrelease", rel, sizeof(rel)-1);
-	readfile("/proc/sys/kernel/version", details, sizeof(details)-1);
-	cp = strchr(details, '\n');
-	if (cp) {
-		cp++;
-		if (*cp)
-			*cp++ = '\t';
-		if (*cp)
-			*cp++ = '\t';
-		if (*cp)
-			*cp++ = '\t';
-	}
-*/
 
 	readfile("/etc/alpine-release", release, sizeof(release)-1);
 }
@@ -525,20 +587,16 @@ checkfile(const char *pathname)
 void
 template(FILE *fp)
 {
-	char *sender = getenv("SENDBUG_FROM");
-	if (sender == NULL)
-		sender = pw->pw_name;
-
 	fprintf(fp, "SENDBUG: -*- sendbug -*-\n");
 	fprintf(fp, "SENDBUG: Lines starting with `SENDBUG' will"
 	    " be removed automatically, as\n");
 	fprintf(fp, "SENDBUG: will all comments (text enclosed in `<' and `>').\n");
 	fprintf(fp, "SENDBUG:\n");
-	fprintf(fp, "To: %s\n", "bugs@alpinelinux.org");
+	fprintf(fp, "To: %s\n", mailto);
 	fprintf(fp, "Subject: \n");
-	fprintf(fp, "From: %s\n", sender);
-	fprintf(fp, "Cc: %s\n", sender);
-	fprintf(fp, "Reply-To: %s\n", sender);
+	fprintf(fp, "From: %s\n", mailfrom);
+	fprintf(fp, "Cc: %s\n", mailfrom);
+	fprintf(fp, "Reply-To: %s\n", mailfrom);
 	fprintf(fp, "X-sendbug-version: %s\n", version);
 	fprintf(fp, "\n");
 	fprintf(fp, "\n");
@@ -556,7 +614,7 @@ template(FILE *fp)
 	fprintf(fp, ">Release:\t%s\n",release);
 	fprintf(fp, ">Environment:\n");
 	fprintf(fp, "\t<machine, os, target, libraries (multiple lines)>\n");
-	fprintf(fp, "\tSystem      : %s %s\n", uts.sysname);
+	fprintf(fp, "\tSystem      : %s\n", uts.sysname);
 	fprintf(fp, "\tVersion     : %s\n", uts.version);
 	fprintf(fp, "\tMachine     : %s\n", uts.machine);
 	fprintf(fp, "\tRelease     : %s\n", uts.release);
