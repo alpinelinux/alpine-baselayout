@@ -9,7 +9,7 @@ start() {
 
 stop () {
 	ebegin "Stopping system logging"
-	killall klogd
+	killall klogd 2>/dev/null
 	killall syslogd
 	eend $?
 }

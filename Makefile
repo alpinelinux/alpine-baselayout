@@ -1,4 +1,4 @@
-VERSION=1.5.1
+VERSION=1.6.0
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -14,11 +14,12 @@ SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
 RC_SH_FILES 	=rc-services.sh
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev
-USR_BIN_FILES	=send-pr
-GNATS_FILES	=send-pr.template send-pr.conf
+#USR_BIN_FILES	=send-pr
+#GNATS_FILES	=send-pr.template send-pr.conf
+SENDBUG_FILES	=sendbug.conf
 CRONTABS 	=crontab
 DISTFILES 	=$(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES)\
-		$(LIB_MDEV_FILES) $(GNATS_FILES) $(USR_BIN_FILES) Makefile
+		$(LIB_MDEV_FILES) $(SENDBUG_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
@@ -60,7 +61,7 @@ install:
 		$(DESTDIR)/etc/crontabs \
 		$(DESTDIR)/lib/rcscripts/sh \
 		$(DESTDIR)/usr/share/udhcpc \
-		$(DESTDIR)/etc/gnats \
+		$(DESTDIR)/etc/sendbug \
 		$(DESTDIR)/usr/bin \
 		$(DESTDIR)/lib/mdev \
 		$(DESTDIR)/var/spool/cron \
@@ -73,14 +74,14 @@ install:
 		cd $$i && make install && cd .. ;\
 	done
 	install -m 0644 $(ETC_FILES) $(DESTDIR)/etc
-	install -m 0644 $(GNATS_FILES) $(DESTDIR)/etc/gnats
+	install -m 0644 $(SENDBUG_FILES) $(DESTDIR)/etc/sendbug
 	chmod 600 $(DESTDIR)/etc/shadow
 	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
 	install -m 0755 $(SBIN_FILES) $(DESTDIR)/sbin
 	install -m 0755 $(UDHCPC_FILES) $(DESTDIR)/usr/share/udhcpc
 	install -m 0755 $(RC_SH_FILES) $(DESTDIR)/lib/rcscripts/sh
 	install -m 0755 $(LIB_MDEV_FILES) $(DESTDIR)/lib/mdev
-	install -m 0755 $(USR_BIN_FILES) $(DESTDIR)/usr/bin
+#	install -m 0755 $(USR_BIN_FILES) $(DESTDIR)/usr/bin
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
 

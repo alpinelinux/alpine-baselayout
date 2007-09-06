@@ -8,6 +8,7 @@ SCRIPTS = alpinecfg.sh \
 	hwclock \
 	hwdrivers \
 	inetd \
+	keymap \
 	localinit \
 	localmount \
 	mdev \

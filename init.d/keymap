@@ -1,0 +1,13 @@
+#!/sbin/runscript
+
+
+start() {
+	[ -z "$KEYMAP" ] && return
+	ebegin "Setting keymap"
+	zcat "$KEYMAP" | loadkmap
+	eend $?
+}
+
+stop() {
+	return
+}
