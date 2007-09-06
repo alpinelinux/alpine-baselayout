@@ -166,11 +166,10 @@ main(int argc, char *argv[])
 		fcopy(stdin, fp);
 		close(0);
 		tty = open(_PATH_TTY, O_RDWR);
-		fprintf(stderr, "tty is %i\n", tty);
 		if (tty < 0)
 			err(1, _PATH_TTY);
 	}
-	
+
 	if (fflush(fp) == EOF || fstat(fd, &sb) == -1 || fclose(fp) == EOF)
 		err(1, "error creating template");
 	mtime = sb.st_mtime;
@@ -287,17 +286,17 @@ editit(const char *pathname)
 int
 prompt(void)
 {
-	int c, ret;
+	char ret;
+	char c;
 
 	__fpurge(stdin);
 	fprintf(stderr, "a)bort, e)dit, or s)end: ");
 	fflush(stderr);
-	ret = getchar();
-	if (ret == EOF || ret == '\n')
-		return (ret);
-	do {
-		c = getchar();
-	} while (c != EOF && c != '\n');
+	/* avoid getchar() to avoid strange bug in uclibc */
+	if (read(0, &ret, 1) <= 0)
+		return (-1);
+	while (read(0, &c, 1) > 0 && c != '\n'); 
+
 	return (ret);
 }
 
