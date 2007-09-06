@@ -34,7 +34,7 @@
 #define _DEFAULT_CONFIG "/etc/sendbug/sendbug.conf"
 
 int	checkfile(const char *);
-void	dmesg(FILE *);
+void	attatch(FILE *);
 int	editit(const char *);
 void	init(void);
 static void	read_config(const char *);
@@ -54,14 +54,15 @@ char release[BUFSIZ];
 //char details[BUFSIZ];
 struct utsname uts;
 char *fullname, *tmppath, *pr_form, *mailfrom, *mailto;
-int Dflag, wantcleanup;
+const char *attatchment = NULL;
+int wantcleanup;
 
 static void
 usage(void)
 {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s [-DLPV] [-c config]\n", __progname);
+	fprintf(stderr, "usage: %s [-d | -a file] [-LPV] [-c config]\n", __progname);
 	exit(1);
 }
 
@@ -72,6 +73,19 @@ cleanup()
 		warn("unlink");
 }
 
+static void
+fcopy(FILE *srcfp, FILE *dstfp)
+{
+	char buf[BUFSIZ];
+	size_t len;
+	while (!feof(srcfp)) {
+		len = fread(buf, 1, sizeof buf, srcfp);
+		if (len == 0)
+			break;
+		if (fwrite(buf, 1, len, dstfp) != len)
+			break;
+	}
+}
 
 int
 main(int argc, char *argv[])
@@ -83,13 +97,16 @@ main(int argc, char *argv[])
 	FILE *fp;
 
 	config_file = NULL;
-	while ((ch = getopt(argc, argv, "c:DLPV")) != -1)
+	while ((ch = getopt(argc, argv, "a:c:dLPV")) != -1)
 		switch (ch) {
+		case 'a':
+			attatchment = optarg;
+			break;
 		case 'c':
 			config_file = optarg;
 			break;
-		case 'D':
-			Dflag = 1;
+		case 'd':
+			attatchment = _PATH_DMESG;
 			break;
 		case 'L':
 			printf("Known categories:\n");
@@ -138,18 +155,22 @@ main(int argc, char *argv[])
 			    "(`%s'), ignoring PR_FORM", pr_form);
 			template(fp);
 		} else {
-			while (!feof(frfp)) {
-				len = fread(buf, 1, sizeof buf, frfp);
-				if (len == 0)
-					break;
-				if (fwrite(buf, 1, len, fp) != len)
-					break;
-			}
+			fcopy(frfp, fp);
 			fclose(frfp);
 		}
 	} else
 		template(fp);
 
+	if (!isatty(0)) {
+		int tty;
+		fcopy(stdin, fp);
+		close(0);
+		tty = open(_PATH_TTY, O_RDWR);
+		fprintf(stderr, "tty is %i\n", tty);
+		if (tty < 0)
+			err(1, _PATH_TTY);
+	}
+	
 	if (fflush(fp) == EOF || fstat(fd, &sb) == -1 || fclose(fp) == EOF)
 		err(1, "error creating template");
 	mtime = sb.st_mtime;
@@ -188,35 +209,23 @@ quit:
 }
 
 void
-dmesg(FILE *fp)
+attatch(FILE *fp)
 {
 	char buf[BUFSIZ];
 	FILE *dfp;
 	off_t offset = -1;
+	size_t len;
 
-	dfp = fopen(_PATH_DMESG, "r");
+	dfp = fopen(attatchment, "r");
 	if (dfp == NULL) {
-		warn("can't read dmesg");
+		warn("can't read %s", attatchment);
 		return;
 	}
 
-	fputs("\n"
-	    "<dmesg is attached.>\n"
-	    "<Feel free to delete or use the -D flag if it contains "
-	    "sensitive information.>\n", fp);
-	if (offset != -1) {
-		size_t len;
+	fprintf(fp, "\n"
+	    "<%s is attached.>\n", attatchment);
 
-		clearerr(dfp);
-		fseeko(dfp, offset, SEEK_SET);
-		while (offset != -1 && !feof(dfp)) {
-			len = fread(buf, 1, sizeof buf, dfp);
-			if (len == 0)
-				break;
-			if (fwrite(buf, 1, len, fp) != len)
-				break;
-		}
-	}
+	fcopy(dfp, fp);
 	fclose(dfp);
 }
 
@@ -280,7 +289,7 @@ prompt(void)
 {
 	int c, ret;
 
-//	fpurge(stdin);
+	__fpurge(stdin);
 	fprintf(stderr, "a)bort, e)dit, or s)end: ");
 	fflush(stderr);
 	ret = getchar();
@@ -410,8 +419,9 @@ init(void)
 
 	if (config_file == NULL)
 		config_file = getenv("SENDBUG_CONF");
-	if (config_file)
-		read_config(config_file);
+	if (config_file == NULL || config_file[0] == '\0')
+		config_file = _DEFAULT_CONFIG;
+	read_config(config_file);
 
 	if ((pw = getpwuid(getuid())) == NULL)
 		err(1, "getpwuid");
@@ -627,6 +637,6 @@ template(FILE *fp)
 	fprintf(fp, "\t<how to correct or work around the problem,"
 	    " if known (multiple lines)>\n");
 
-	if (!Dflag)
-		dmesg(fp);
+	if (attatchment)
+		attatch(fp);
 }

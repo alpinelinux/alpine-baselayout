@@ -2,7 +2,7 @@
 CC = gcc
 LD = gcc
 
-SBIN_TARGETS = runscript readahead cttyhack
+SBIN_TARGETS = runscript 
 USR_BIN_TARGETS = sendbug
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS) $(USR_BIN_TARGETS)
 
