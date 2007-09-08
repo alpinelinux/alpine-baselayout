@@ -162,11 +162,8 @@ main(int argc, char *argv[])
 		template(fp);
 
 	if (!isatty(0)) {
-		int tty;
 		fcopy(stdin, fp);
-		close(0);
-		tty = open(_PATH_TTY, O_RDWR);
-		if (tty < 0)
+		if (freopen(_PATH_TTY, "r", stdin) == NULL)
 			err(1, _PATH_TTY);
 	}
 
@@ -286,16 +283,17 @@ editit(const char *pathname)
 int
 prompt(void)
 {
-	char ret;
-	char c;
+	int ret, c;
 
 	__fpurge(stdin);
 	fprintf(stderr, "a)bort, e)dit, or s)end: ");
 	fflush(stderr);
-	/* avoid getchar() to avoid strange bug in uclibc */
-	if (read(0, &ret, 1) <= 0)
-		return (-1);
-	while (read(0, &c, 1) > 0 && c != '\n'); 
+	ret = getchar();
+	if (ret == EOF || ret == '\n')
+		return (ret);
+	do {
+		c = getchar();
+	} while (c != EOF && c != '\n');
 
 	return (ret);
 }
