@@ -1,6 +1,6 @@
 #!/sbin/runscript
 
-# The purpose of this script is to load the Alpine runtime modules and the 
+# The purpose of this script is to load the Alpine runtime modules and the
 # local config that belongs to.
 
 SFIC=`which sfic 2>/dev/null`
@@ -20,12 +20,6 @@ get_kopt () {
 }
 
 get_pkg_list() {
-#	# we skip lines that start with '#'
-#	grep -v '^#' $1 | while read pkg ; do
-#		for i in $pkg ; do
-#			echo -n "$pkg "
-#		done
-#	done 
 	sed 's/\#.*//' $1
 }
 
@@ -65,7 +59,7 @@ find_ovl() {
 	fi
 
 	# look for apkovl's on mounted media
-	ovl=$( ls -1 "$mnt"/*.apkovl.tar.gz 2>/dev/null ) || return 1
+	ovl=$( ls -1 "$mnt"/*.apkovl.tar.gz* 2>/dev/null ) || return 1
 	lines=$(echo "$ovl" | wc -l)
 
 	if [ $lines -gt 1 ] ; then
@@ -84,7 +78,7 @@ readahead_pkgs() {
 	done
 	readahead $pkgs 2>/dev/null &
 }
-	
+
 load_pkgs_from_list() {
 	local list="$1"
 	local prompt="$2"
@@ -122,7 +116,7 @@ load_pkgs() {
 		#ok, we are upgrading...
 		local line i
 		eeinfo "
-NOTE: Using packages.list from $dev. This file has moved to 
+NOTE: Using packages.list from $dev. This file has moved to
 etc/lbu/packages.list and will be included in the apkovl.
 "
 		load_pkgs_from_list "$mlist"
@@ -144,18 +138,43 @@ load_pkgs_and_config() {
 	local ovlfile
 	local mnt=$2
 	local dev=$1
+	local dest
 
 	cd /
 	# look for apk overlays.
 	ovlfile=$( find_ovl "$mnt" ) || return 1
 
-	ebegin "Loading setup from $dev://$(basename $ovlfile)"
-	# unpack the ovl
 	mkdir -p "$TMP"
-	if ! tar -C "$TMP" -zxf "$ovlfile" ; then
-		eend $?
-		return
-	fi
+	ebegin "Loading setup from $dev://$(basename $ovlfile)"
+	case "$ovlfile" in
+	*.apkovl.tar.gz.*)
+		local cipher=${ovlfile##*.}
+		local count=0
+		if ! openssl list-cipher-commands \
+			| grep "^$cipher$" > /dev/null; then
+			eend 1 "Cipher $cipher is not supported"
+			return 1
+		fi
+		echo ""
+		while true ; do
+			count=$(( $count + 1 ))
+			openssl enc -d -$cipher -in "$ovlfile" \
+				| tar -C "$TMP" -zx 2>/dev/null
+			if [ $? -eq 0 ]; then
+				break
+			elif [ $count -ge 3 ]; then
+				eend 1
+				return
+			fi
+		done
+		;;
+	*)
+		# unpack the ovl
+		if ! tar -C "$TMP" -zxf "$ovlfile" ; then
+			eend $?
+			return
+		fi
+	esac
 
 	# copy the passwd file
 	[ -f "$TMP/etc/passwd" ] && cp $TMP/etc/passwd /etc
@@ -175,14 +194,14 @@ load_pkgs_and_config() {
 # find where to install packages from
 set_apk_path() {
 	local dev fs mnt pref subdir
-	# if pkg_path is not specified as kernel arg, look for the packages 
+	# if pkg_path is not specified as kernel arg, look for the packages
 	# on mounted cdrom
 	APK_PATH=`get_kopt pkg_path`
 	APK_DEV=`get_kopt pkg_dev`
 
 	# return if pkg_dev is empty
 	if [ x"$APK_DEV" = x ] ; then
-		export APK_PATH	
+		export APK_PATH
 		return
 	fi
 
@@ -251,7 +270,7 @@ start() {
 	modprobe sd_mod 2>/dev/null
 	modprobe floppy 2>/dev/null
 	modprobe cdrom 2>/dev/null
-	
+
 	set_apk_path
 
 	cfgdevs=$( echo $( get_kopt cfg_dev ) | tr , ' ')
