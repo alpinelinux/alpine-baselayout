@@ -63,9 +63,8 @@ find_ovl() {
 	lines=$(echo "$ovl" | wc -l)
 
 	if [ $lines -gt 1 ] ; then
-		# output the last line only
-		ovl=$(echo "$ovl" | tail -n 1)
-		echo "Warning: more than one apkovl file was found. Only $ovl will be used." >&2
+		echo "ERROR: More than one apkovl file was found on $(basename $mnt). None will be read." >&2
+		exit 1
 	fi
 	echo "$ovl"
 }
