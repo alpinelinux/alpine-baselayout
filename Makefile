@@ -1,4 +1,4 @@
-VERSION=1.6.1
+VERSION=1.7.0
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -13,7 +13,7 @@ SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
 		modules-update ifenslave
 RC_SH_FILES 	=rc-services.sh
 UDHCPC_FILES 	=default.script 
-LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev
+LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev dvbdev
 #USR_BIN_FILES	=send-pr
 #GNATS_FILES	=send-pr.template send-pr.conf
 SENDBUG_FILES	=sendbug.conf
