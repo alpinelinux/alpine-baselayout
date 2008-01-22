@@ -23,6 +23,9 @@ fi
 
 case "$ACTION" in
 	add|"")
+		if [ -L "$MDEV" ]; then
+			exit 0
+		fi
 		mkdir -p $1 
 		mv $MDEV $1/$new_name
 		if [ "$link" = 1 ] ; then
