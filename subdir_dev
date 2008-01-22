@@ -21,30 +21,26 @@ if [ -n "$2" ]; then
 	new_name="$2"
 fi
 
+if [ -z "$new_name" ]; then
+	new_name=$MDEV
+fi
+
 case "$ACTION" in
 	add|"")
-		if [ -L "$MDEV" ]; then
-			exit 0
+		if [ ! -b "$MDEV" ] && [ ! -c "$MDEV" ]; then
+			exit
 		fi
 		mkdir -p $1 
 		mv $MDEV $1/$new_name
 		if [ "$link" = 1 ] ; then
-			if [ -z "$new_name" ] ; then
-				ln -snf $1/$MDEV $MDEV
-			else
-				ln -snf $1/$new_name $MDEV
-			fi
+			ln -snf $1/$new_name $MDEV
 		fi
 		;;
 	remove)
 		if [ "$link" = 1 ] ; then
 			rm -f $MDEV
 		fi
-		if [ -z "$new_name" ]; then
-			mv $1/$MDEV $MDEV
-		else
-			mv $1/$new_name $MDEV
-		fi
+		mv $1/$new_name $MDEV
 		rmdir $1 2>/dev/null
 		;;
 esac
