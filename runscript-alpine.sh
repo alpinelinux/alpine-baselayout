@@ -100,9 +100,11 @@ for arg in $* ; do
 		;;
 	*)		
 		for opt in $opts ; do
-			[ "$arg" = "$opt" ] && $arg
+			if [ "$arg" = "$opt" ]; then
+				$arg
+			fi
 		done
 		;;
 	esac
 done
-	
+
