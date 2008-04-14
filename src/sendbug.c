@@ -31,6 +31,9 @@
 #ifndef _PATH_DMESG
 #define _PATH_DMESG "/var/log/dmesg"
 #endif
+#ifndef _PATH_SENDMAIL
+#define _PATH_SENDMAIL "/usr/sbin/sendmail"
+#endif
 #define _DEFAULT_CONFIG "/etc/sendbug/sendbug.conf"
 
 int	checkfile(const char *);
@@ -95,6 +98,12 @@ main(int argc, char *argv[])
 	struct stat sb;
 	time_t mtime;
 	FILE *fp;
+
+	if (access(_PATH_SENDMAIL, R_OK | X_OK) == -1) {
+		warn("sendmail");
+		fprintf(stderr, "Please run 'setup-sendbug' to configure sendbug\n");
+		return ret;
+	}
 
 	config_file = NULL;
 	while ((ch = getopt(argc, argv, "a:c:dLPV")) != -1)
