@@ -4,6 +4,7 @@ SCRIPTS = alpinecfg.sh \
 	checkroot.sh \
 	coldplug \
 	cron \
+	dnsd \
 	hostname \
 	hwclock \
 	hwdrivers \

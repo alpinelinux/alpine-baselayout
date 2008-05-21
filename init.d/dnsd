@@ -1,0 +1,13 @@
+#!/sbin/runscript
+
+start() {
+	ebegin "Starting dnsd"
+	dnsd -d $DNSD_OPTS
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping dnsd"
+	killall dnsd
+	eend $?
+}
