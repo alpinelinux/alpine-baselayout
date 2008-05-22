@@ -6,6 +6,7 @@ SCRIPTS = alpinecfg.sh \
 	cron \
 	dnsd \
 	hostname \
+	httpd \
 	hwclock \
 	hwdrivers \
 	inetd \

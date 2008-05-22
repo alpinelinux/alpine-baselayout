@@ -1,0 +1,15 @@
+#!/sbin/runscript
+
+DAEMON=httpd
+start() {
+	ebegin "Starting $DAEMON"
+	$DAEMON $HTTPD_OPTS
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping $DAEMON"
+	killall $DAEMON
+	eend $?
+}
+
