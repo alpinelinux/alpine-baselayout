@@ -17,6 +17,7 @@ SCRIPTS = alpinecfg.sh \
 	modutils \
 	networking \
 	procps \
+	rc.local \
 	rcK \
 	rcL \
 	rcS \
