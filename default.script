@@ -5,15 +5,43 @@
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
 RESOLV_CONF="/etc/resolv.conf"
+UDHCPC_CONF="/etc/udhcpc/udhcpc.conf"
+UDHCPC_PREUP="/etc/udhcpc/pre-up"
+UDHCPC_PREDOWN="/etc/udhcpc/pre-down"
+UDHCPC_POSTUP="/etc/udhcpc/post-up"
+UDHCPC_POSTDOWN="/etc/udhcpc/post-down"
+[ -f $UDHCPC_CONF ] && . $UDHCPC_CONF
+
+run_scripts() {
+	local dir=$1
+	if [ -d $dir ]; then
+		for i in $dir/*; do
+			[ -f $i ] && $i
+		done
+	fi
+}
+
+export broadcast
+export subnet
+export interface
+export ip
+export router
+export metric
+export domain
+export dns
+
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
 
 case "$1" in
 	deconfig)
+		run_scripts $UDHCPC_PREDOWN
 		/sbin/ifconfig $interface 0.0.0.0
+		run_scripts $UDHCPC_POSTDOWN
 		;;
 
 	renew|bound)
+		run_scripts $UDHCPC_PREUP
 		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
 
 		if [ -n "$router" ] ; then
@@ -28,13 +56,16 @@ case "$1" in
 				metric=$(( $metric + 1 ))
 			done
 		fi
-
-		echo -n > $RESOLV_CONF
-		[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
-		for i in $dns ; do
-			echo adding dns $i
-			echo nameserver $i >> $RESOLV_CONF
-		done
+		if [ "$RESOLV_CONF" != "NO" ] && [ "$RESOLV_CONF" != "no" ]\
+				&& [ -n "$RESOLV_CONF" ]; then
+			echo -n > $RESOLV_CONF
+			[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+			for i in $dns ; do
+				echo adding dns $i
+				echo nameserver $i >> $RESOLV_CONF
+			done
+		fi
+		run_scripts $UDHCPC_POSTDOWN
 		;;
 esac
 
