@@ -81,12 +81,12 @@ readahead_pkgs() {
 load_pkgs_from_list() {
 	local list="$1"
 	local prompt="$2"
-	local pkgs pkg
+	local pkgs dummy
 	apk_fetch -u -q
 	pkgs=$( sed 's/\#.*//' "$list" )
 	readahead_pkgs $pkgs
-	for pkg in $pkgs ; do
-		apk_add -q $pkg && echo -n '.'
+	IGNORE_ERRORS=yes apk_add $pkgs 2>&1 | grep ^ins | while read dummy; do
+		echo -n '.'
 	done
 }
 
