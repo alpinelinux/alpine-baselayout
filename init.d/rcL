@@ -12,5 +12,7 @@ for i in `seq 0 9` ; do
 		[ -f $j ] && $j start
 	done
 done
+
+cat /proc/uptime >/tmp/boot-time
 exit 0
 
