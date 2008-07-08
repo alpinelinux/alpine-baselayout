@@ -63,3 +63,8 @@ blacklist virgefb
 blacklist vga16fb
 blacklist matroxfb_base
 
+# blacklist 1394 drivers
+blacklist ohci1394
+blacklist video1394
+blacklist dv1394
+
