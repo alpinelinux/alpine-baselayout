@@ -1,4 +1,4 @@
-VERSION=1.9.2
+VERSION=1.10
 
 PV 		=alpine-baselayout-$(VERSION)
 TARBALL 	=$(PV).tar.gz
@@ -7,14 +7,14 @@ SUBDIRS 	=src init.d
 GENERATED_FILES =TZ hosts profile
 ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
 		passwd protocols services shadow shells issue mdev.conf \
-		crontab sysctl.conf modprobe.conf
+		crontab sysctl.conf 
 CONFD_FILES = $(addprefix conf.d/, cron localinit rdate syslog tuntap vlan watchdog)
 SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
-		modules-update ifenslave
+		ifenslave
 RC_SH_FILES 	=rc-services.sh
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev dvbdev
-MODPROBED_FILES	=blacklist
+MODPROBED_FILES	=aliases blacklist i386
 SENDBUG_FILES	=sendbug.conf
 CRONTABS 	=crontab
 DISTFILES 	=$(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES)\
