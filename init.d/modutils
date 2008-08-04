@@ -3,7 +3,6 @@
 PATH="/sbin:/bin:/usr/bin:/usr/bin"
 
 start() {
-	modules-update
 	if [ -f /etc/modules ] ; then
 		sed 's/\#.*//g' < /etc/modules |
 		while read module args
