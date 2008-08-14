@@ -1,3 +1,6 @@
+# Copyright 2007-2008 Natanael Copa <natanael.copa@gmail.com>
+# Copyright 2007-2008 Roy Marples <roy@marples.name>
+# All rights reserved. Released under the 2-clause BSD license.
 
 RC_GOT_FUNCTIONS="yes"
 
@@ -67,6 +70,10 @@ eindent() {
 	true
 }
 
+eoutdent() {
+	true
+}
+
 start_addon() {
 	(import_addon "$1-start.sh")
 	return 0
@@ -94,3 +101,21 @@ die() {
 	eerror "$1"
 	exit 1
 }
+
+yesno() {
+	[ -z "$1" ] && return 1
+
+	case "$1" in
+		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;;
+		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;;
+	esac
+
+	local value=
+	eval value=\$${1}
+	case "${value}" in
+		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;;
+		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;;
+		*) ewarn "\$${1} is not set properly"; return 1;;
+	esac
+}
+
