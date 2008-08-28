@@ -1,16 +1,5 @@
 #!/sbin/runscript
 
-SEC=`date +%s`
-
-# echo a . every second
-timer_dots() {
-	local newsec=`date +%s`
-	if [ "$SEC" != "$newsec" ] ; then
-		echo -n '.'
-		SEC=$newsec
-	fi
-}
-
 # Load hardware drivers
 start() {
 	# check for boot option "nocoldplug"
@@ -33,13 +22,11 @@ start() {
 	fi	
 	
 	[ "$MODULES" ] && modprobe $MODULES 2> /dev/null
-	timer_dots
 
 	if [ "$AUTODETECT" != no ] ; then
-		find /sys -name modalias | while read a ; do
-			modprobe `cat $a` 2>/dev/null || \
-				echo $a >> /tmp/hwdrivers.failed
-			timer_dots
+		find /sys -name modalias | xargs sort | while read a ; do
+			modprobe $a 2>/dev/null \
+				|| echo $a >> /tmp/hwdrivers.failed
 		done
 	fi
 	eend 0
