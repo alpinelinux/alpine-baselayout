@@ -22,8 +22,7 @@ mklink_disk() {
 
 # function to create a link to a partition (sd[a-z][0-9])
 mklink_partition() {
-	local num
-	num=`echo $MDEV | sed 's/sd[a-z]//'`
+	local num=${MDEV##sd[a-z]}
 	
 	for i in usb[a-z] ; do
 		if [ "`readlink $i 2>/dev/null`" = $DISK ] ; then
@@ -55,24 +54,22 @@ if [ "$USBLINK" ] ;then
 fi
 
 # find out if its a disk or a partition
-if [ -d /sys/block/$MDEV ] ; then
+if [ -e /sys/block/$MDEV ] ; then
 	TYPE=disk
 	DISK=$MDEV
-	SCSIDEV=/sys/block/$MDEV/device/scsi_device:*
-elif [ -d /sys/block/*/$MDEV ] ; then
+	SYSDEV=`readlink -f /sys/block/$MDEV/device`
+elif [ -e /sys/block/*/$MDEV ] ; then
 	TYPE=partition
 	PARENT=`dirname /sys/block/*/$MDEV`
-	DISK=`basename $PARENT`
-	SCSIDEV=$PARENT/device/scsi_device:*
+	DISK=${PARENT##*/}	# basename $PARENT
+	SYSDEV=`readlink -f $PARENT/device`
 else
 	exit
 fi
 
-# check if the scsi host belongs to usb-storage. exit if it doesn't
-SCSI_HOST=`basename $SCSIDEV | cut -d : -f 2`
-[ -f "/proc/scsi/usb-storage/$SCSI_HOST" ] || exit
-
-# create link
-mklink_$TYPE
-
+# if /sys device path contains '/usb[0-9]' then we assume its usb
+if [ "${SYSDEV##*/usb[0-9]}" != "$SYSDEV" ]; then
+	mklink_$TYPE
+	exit
+fi
 
