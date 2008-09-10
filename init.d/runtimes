@@ -78,16 +78,23 @@ readahead_pkgs() {
 	readahead $pkgs 2>/dev/null &
 }
 
+roller() {
+	awk 'BEGIN { 
+	 	i=0; split("\\ | / -", a, " ");
+		printf " "; 
+	} 
+	{ printf "\b" a[and(i++,3)+1] } 
+	END { printf "\b" }'
+}
+
 load_pkgs_from_list() {
 	local list="$1"
 	local prompt="$2"
 	local pkgs dummy
-	apk_fetch -u -q
+#	apk_fetch -u -q
 	pkgs=$( sed 's/\#.*//' "$list" )
 	readahead_pkgs $pkgs
-	IGNORE_ERRORS=yes apk_add $pkgs 2>&1 | grep ^ins | while read dummy; do
-		echo -n '.'
-	done
+	IGNORE_ERRORS=yes apk_add -v $pkgs 2>&1 | roller
 }
 
 load_pkgs() {
