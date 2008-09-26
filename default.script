@@ -1,16 +1,25 @@
 #!/bin/sh
 
-# udhcpc script edited by Tim Riker <Tim@Rikers.org>
+# script for udhcpc
+# Copyright (c) 2008 Natanael Copa <natanael.copa@gmail.com>
 
-[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+UDHCPC="/etc/udhcpc"
+UDHCPC_CONF="$UDHCPC/udhcpc.conf"
 
 RESOLV_CONF="/etc/resolv.conf"
-UDHCPC_CONF="/etc/udhcpc/udhcpc.conf"
-UDHCPC_PREUP="/etc/udhcpc/pre-up"
-UDHCPC_PREDOWN="/etc/udhcpc/pre-down"
-UDHCPC_POSTUP="/etc/udhcpc/post-up"
-UDHCPC_POSTDOWN="/etc/udhcpc/post-down"
 [ -f $UDHCPC_CONF ] && . $UDHCPC_CONF
+
+export broadcast
+export dns
+export domain
+export interface
+export ip
+export mask
+export metric
+export router
+export subnet
+
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
 run_scripts() {
 	local dir=$1
@@ -21,52 +30,79 @@ run_scripts() {
 	fi
 }
 
-export broadcast
-export subnet
-export interface
-export ip
-export router
-export metric
-export domain
-export dns
+deconfig() {
+	ip addr flush dev $interface
+}
 
-[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
-[ -n "$subnet" ] && NETMASK="netmask $subnet"
+routes() {
+	[ -z "$router" ] && return
+	local gw metric
+	while ip route del default via dev $interface 2>/dev/null; do
+		:
+	done
+	metric=0
+	for gw in $router; do
+		route add default gw $gw dev $interface metric $metric
+		metric=$(( $metric + 1 ))
+	done
+}
+
+resolvconf() {
+	local i
+	if [ "$RESOLV_CONF" = "no" ] || [ "$RESOLV_CONF" = "NO" ] \
+			|| [ -z "$RESOLV_CONF" ]; then
+		return
+	fi
+	echo -n > "$RESOLV_CONF"
+	[ -n "$domain" ] && echo "search $domain" >> "$RESOLV_CONF"
+	for i in $dns; do
+		echo "nameserver $i" >> "$RESOLV_CONF"
+	done
+}
+
+bound() {
+	ip addr add $ip/$mask dev $interface
+	ip link set dev $interface up
+	routes
+	resolvconf
+}
+
+renew() {
+	if ! ip addr show dev $interface | grep $ip/$mask; then
+		ip addr flush dev $interface
+		ip addr add $ip/$mask dev $interface
+	fi
+
+	local i
+	for i in $router; do
+		if ! ip route show | grep ^default | grep $i; then
+			routes
+			break
+		fi
+	done
+
+	if ! grep "^search $domain"; then
+		resolvconf
+		return
+	fi
+	for i in $dns; do
+		if ! grep "^nameserver $i"; then
+			resolvconf
+			return
+		fi
+	done
+}
 
 case "$1" in
-	deconfig)
-		run_scripts $UDHCPC_PREDOWN
-		/sbin/ifconfig $interface 0.0.0.0
-		run_scripts $UDHCPC_POSTDOWN
+	deconfig|renew|bound)
+		run_scripts $UDHCPC/pre-$1
+		$1
+		run_scripts $UDHCPC/post-$1
 		;;
-
-	renew|bound)
-		run_scripts $UDHCPC_PREUP
-		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
-
-		if [ -n "$router" ] ; then
-			echo "deleting routers"
-			while route del default gw 0.0.0.0 dev $interface ; do
-				:
-			done
-
-			metric=0
-			for i in $router ; do
-				route add default gw $i dev $interface metric $metric
-				metric=$(( $metric + 1 ))
-			done
-		fi
-		if [ "$RESOLV_CONF" != "NO" ] && [ "$RESOLV_CONF" != "no" ]\
-				&& [ -n "$RESOLV_CONF" ]; then
-			echo -n > $RESOLV_CONF
-			[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
-			for i in $dns ; do
-				echo adding dns $i
-				echo nameserver $i >> $RESOLV_CONF
-			done
-		fi
-		run_scripts $UDHCPC_POSTDOWN
+	*)
+		echo "Error: this script should be called from udhcpc" >&2
+		exit 1
 		;;
 esac
-
 exit 0
+
