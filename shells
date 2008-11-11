@@ -1,4 +1,5 @@
 # valid login shells
+/bin/sh
 /bin/ash
 /bin/dash
 #/bin/bash
