@@ -119,3 +119,13 @@ yesno() {
 	esac
 }
 
+# print a cute \ | / - animation
+roller() {
+	awk 'BEGIN { 
+	 	i=0; split("\\ | / -", a, " ");
+		printf " "; 
+	} 
+	{ printf "\b" a[and(i++,3)+1] } 
+	END { printf "\b" }'
+}
+

@@ -78,15 +78,6 @@ readahead_pkgs() {
 	readahead $pkgs 2>/dev/null &
 }
 
-roller() {
-	awk 'BEGIN { 
-	 	i=0; split("\\ | / -", a, " ");
-		printf " "; 
-	} 
-	{ printf "\b" a[and(i++,3)+1] } 
-	END { printf "\b" }'
-}
-
 load_pkgs_from_list() {
 	local list="$1"
 	local prompt="$2"
