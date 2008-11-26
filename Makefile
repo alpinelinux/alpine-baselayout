@@ -43,6 +43,7 @@ hosts:
 profile:
 	echo "export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin" > $@
 	echo "export PAGER=less" >> $@
+	echo "export PS1='\\h:\\w\\$$ '" >>$@
 	echo "umask 022" >> $@
 
 shadow:	passwd
