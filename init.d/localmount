@@ -9,6 +9,9 @@ start() {
 		types="$types,$i"
 	done
 
+	# create mount points from fstab
+	mkmntdirs /etc/fstab
+
 	ebegin "Mounting local file systems"
 	mount -at "$types"
 	eend $? "Some local filesystems failed to mount"
