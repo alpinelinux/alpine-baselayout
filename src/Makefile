@@ -2,7 +2,7 @@
 CC = gcc
 LD = gcc
 
-SBIN_TARGETS = runscript 
+SBIN_TARGETS = runscript mkmntdirs 
 USR_BIN_TARGETS = sendbug
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS) $(USR_BIN_TARGETS)
 
