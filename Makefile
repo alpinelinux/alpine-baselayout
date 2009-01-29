@@ -1,7 +1,8 @@
-VERSION=1.13
+PACKAGE=alpine-baselayout
+VERSION=2.0_alpha1
 
-PV 		=alpine-baselayout-$(VERSION)
-TARBALL 	=$(PV).tar.gz
+PV 		=$(PACKAGE)-$(VERSION)
+TARBALL 	=$(PV).tar.bz2
 SUBDIRS 	=src init.d
 
 GENERATED_FILES =TZ hosts profile
@@ -85,19 +86,27 @@ install:
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
+	install -d $(addprefix $(DESTDIR)/, dev/pts dev/shm lib/firmware \
+		media/cdrom media/floppy media/usb etc/rcL.d etc/rcK.d etc/apk \
+		proc sys var/run var/lock var/log \
+		usr/local/bin usr/local/lib usr/local/share)
+	install -d -m 0770 $(DESTDIR)/root
+	echo "af_packet" >$(DESTDIR)/etc/modules
+
+
 
 $(TARBALL): $(DISTFILES) $(SUBDIRS)
-	rm -rf $(PV)
-	mkdir $(PV)
+	rm -rf $(PACKAGE)
+	mkdir $(PACKAGE)
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make clean && cd .. ; \
 	done
-	cp $(DISTFILES) $(PV)
-	mkdir $(PV)/conf.d
-	cp $(CONFD_FILES) $(PV)/conf.d/
-	rsync -Cr $(SUBDIRS) $(PV)
-	tar --exclude=.svn -czf $@ $(PV)
-	rm -r $(PV)
+	cp $(DISTFILES) $(PACKAGE)
+	mkdir $(PACKAGE)/conf.d
+	cp $(CONFD_FILES) $(PACKAGE)/conf.d/
+	rsync -Cr $(SUBDIRS) $(PACKAGE)
+	tar -cjf $@ $(PACKAGE)
+	rm -r $(PACKAGE)
 
 dist:	$(TARBALL)
 
