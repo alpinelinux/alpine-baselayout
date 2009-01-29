@@ -2,8 +2,13 @@
 
 # we need the proc to be able to install busybox
 /bin/busybox mkdir -p /proc /usr/sbin /sys
-/bin/busybox mount -t proc -o noexec,nosuid,nodev proc /proc
-/bin/busybox mount -t sysfs -o noexec,nosuid,nodev sysfs /sys
+if ! [ -e /proc/uptime ]; then
+	/bin/busybox mount -t proc -o noexec,nosuid,nodev proc /proc
+fi
+
+if ! /bin/busybox mount | grep /sys >/dev/null; then
+	/bin/busybox mount -t sysfs -o noexec,nosuid,nodev sysfs /sys
+fi
 
 # install busybox links
 /bin/busybox --install -s
@@ -13,21 +18,11 @@ echo "Starting $RELEASE"
 
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
 
-# use dash if it exists
-[ -x /bin/dash ] && ln -sf /bin/dash /bin/sh
-
-# define some default variables
-export DEFAULT_CFG_MOUNTS="/media/cdrom /media/floppy /media/usb"
-export DEFAULT_ALPINE_CONF="/alpine.conf"
-export DEFAULT_ALPINE_PACKAGES="/packages.conf"
-export DEFAULT_PKG_PATH="cdrom://apks"
-
 # start an rc script. Look if there are a no<service> in /proc/cmdline
 start_script() {
 	local n
 	if [ -f $1 ] ; then
 		for n in `cat /proc/cmdline`; do
-			[ "$n" = "s" ] && SINGLEMODE=yes
 			case $1 in
 				S??no$n)	return 1;;
 			esac
