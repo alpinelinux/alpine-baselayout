@@ -1,5 +1,6 @@
 # /etc/inittab
 
+::sysinit:/etc/init.d/rcS
 ::wait:/etc/init.d/rcL
 
 # Set up a couple of getty's
