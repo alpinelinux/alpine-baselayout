@@ -10,8 +10,7 @@ ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
 		passwd protocols services shadow shells issue mdev.conf \
 		crontab sysctl.conf 
 CONFD_FILES = $(addprefix conf.d/, cron hwclock localinit rdate syslog tuntap vlan watchdog)
-SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status\
-		ifenslave
+SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status
 RC_SH_FILES 	=rc-services.sh
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links sd_links subdir_dev usbdev dvbdev
