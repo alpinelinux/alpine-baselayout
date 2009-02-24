@@ -66,6 +66,10 @@ install:
 		$(DESTDIR)/lib/mdev \
 		$(DESTDIR)/etc/modprobe.d \
 		$(DESTDIR)/var/spool/cron \
+		$(DESTDIR)/etc/network/if-down.d \
+		$(DESTDIR)/etc/network/if-post-down.d \
+		$(DESTDIR)/etc/network/if-pre-up.d \
+		$(DESTDIR)/etc/network/if-up.d \
 		$(DESTDIR)/etc/periodic/15min \
 		$(DESTDIR)/etc/periodic/hourly \
 		$(DESTDIR)/etc/periodic/daily \
@@ -87,7 +91,7 @@ install:
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
 	install -d $(addprefix $(DESTDIR)/, dev/pts dev/shm lib/firmware \
 		media/cdrom media/floppy media/usb etc/rcL.d etc/rcK.d etc/apk \
-		proc sys var/run var/lock var/log \
+		proc sys var/run var/lock/subsys var/lib/misc var/log \
 		usr/local/bin usr/local/lib usr/local/share)
 	install -d -m 0770 $(DESTDIR)/root
 	echo "af_packet" >$(DESTDIR)/etc/modules
