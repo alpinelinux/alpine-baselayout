@@ -1,5 +1,5 @@
 PACKAGE=alpine-baselayout
-VERSION=2.0_alpha3
+VERSION=2.0_alpha4
 
 PV 		=$(PACKAGE)-$(VERSION)
 TARBALL 	=$(PV).tar.bz2
@@ -115,6 +115,7 @@ install: $(GENERATED_FILES)
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
+	ln -s /proc/mounts $(DESTDIR)/etc/mtab
 	echo "af_packet" >$(DESTDIR)/etc/modules
 
 
