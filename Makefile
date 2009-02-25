@@ -94,6 +94,7 @@ install:
 		proc sys var/run var/lock/subsys var/lib/misc var/log \
 		usr/local/bin usr/local/lib usr/local/share)
 	install -d -m 0770 $(DESTDIR)/root
+	install -d -m 1777 $(DESTDIR)/tmp
 	echo "af_packet" >$(DESTDIR)/etc/modules
 
 
