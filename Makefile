@@ -56,25 +56,50 @@ shadow:	passwd
 
 #		":" $$pw ":"'"$$lastchange"'":0:::::"
 install:
-	install -m 0755 -d $(addprefix $(DESTDIR)/, etc sbin) \
-		$(DESTDIR)/etc/conf.d \
-		$(DESTDIR)/etc/crontabs \
-		$(DESTDIR)/lib/rcscripts/sh \
-		$(DESTDIR)/usr/share/udhcpc \
-		$(DESTDIR)/etc/sendbug \
-		$(DESTDIR)/usr/bin \
-		$(DESTDIR)/lib/mdev \
-		$(DESTDIR)/etc/modprobe.d \
-		$(DESTDIR)/var/spool/cron \
-		$(DESTDIR)/etc/network/if-down.d \
-		$(DESTDIR)/etc/network/if-post-down.d \
-		$(DESTDIR)/etc/network/if-pre-up.d \
-		$(DESTDIR)/etc/network/if-up.d \
-		$(DESTDIR)/etc/periodic/15min \
-		$(DESTDIR)/etc/periodic/hourly \
-		$(DESTDIR)/etc/periodic/daily \
-		$(DESTDIR)/etc/periodic/weekly \
-		$(DESTDIR)/etc/periodic/monthly 
+	install -m 0755 -d $(addprefix $(DESTDIR)/, \
+		dev \
+		dev/pts \
+		dev/shm \
+		etc \
+		etc/apk \
+		etc/conf.d \
+		etc/crontabs \
+		etc/modprobe.d \
+		etc/network/if-down.d \
+		etc/network/if-post-down.d \
+		etc/network/if-pre-up.d \
+		etc/network/if-up.d \
+		etc/periodic/15min \
+		etc/periodic/daily \
+		etc/periodic/hourly \
+		etc/periodic/monthly \
+		etc/periodic/weekly \
+		etc/rcK.d \
+		etc/rcL.d \
+		etc/sendbug \
+		lib/firmware \
+		lib/mdev \
+		lib/rcscripts/sh \
+		media/cdrom \
+		media/floppy \
+		media/usb \
+		proc \
+		sbin \
+		sys \
+		usr/bin \
+		usr/local/bin \
+		usr/local/lib \
+		usr/local/share \
+		usr/share/udhcpc \
+		var/lib/misc \
+		var/lock/subsys \
+		var/log \
+		var/run \
+		var/spool/cron \
+		var/tmp \
+		)
+	install -d -m 0770 $(DESTDIR)/root
+	install -d -m 1777 $(DESTDIR)/tmp
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make install && cd .. ;\
 	done
@@ -89,12 +114,6 @@ install:
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
-	install -d $(addprefix $(DESTDIR)/, dev/pts dev/shm lib/firmware \
-		media/cdrom media/floppy media/usb etc/rcL.d etc/rcK.d etc/apk \
-		proc sys var/run var/lock/subsys var/lib/misc var/log \
-		usr/local/bin usr/local/lib usr/local/share)
-	install -d -m 0770 $(DESTDIR)/root
-	install -d -m 1777 $(DESTDIR)/tmp
 	echo "af_packet" >$(DESTDIR)/etc/modules
 
 
