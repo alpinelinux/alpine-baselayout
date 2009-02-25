@@ -54,7 +54,6 @@ shadow:	passwd
 		print $$1 pw "'"$$lastchange"':0:::::"  \
 	}' passwd > $@
 
-#		":" $$pw ":"'"$$lastchange"'":0:::::"
 install:
 	install -m 0755 -d $(addprefix $(DESTDIR)/, \
 		dev \
@@ -77,16 +76,19 @@ install:
 		etc/rcK.d \
 		etc/rcL.d \
 		etc/sendbug \
+		home \
 		lib/firmware \
 		lib/mdev \
 		lib/rcscripts/sh \
 		media/cdrom \
 		media/floppy \
 		media/usb \
+		mnt \
 		proc \
 		sbin \
 		sys \
 		usr/bin \
+		usr/sbin \
 		usr/local/bin \
 		usr/local/lib \
 		usr/local/share \
@@ -96,10 +98,9 @@ install:
 		var/log \
 		var/run \
 		var/spool/cron \
-		var/tmp \
 		)
 	install -d -m 0770 $(DESTDIR)/root
-	install -d -m 1777 $(DESTDIR)/tmp
+	install -d -m 1777 $(DESTDIR)/tmp $(DESTDIR)/var/tmp
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make install && cd .. ;\
 	done
