@@ -5,10 +5,25 @@ PV 		=$(PACKAGE)-$(VERSION)
 TARBALL 	=$(PV).tar.bz2
 SUBDIRS 	=src init.d
 
-GENERATED_FILES =TZ hosts profile
-ETC_FILES 	=$(GENERATED_FILES) group fstab inittab nsswitch.conf \
-		passwd protocols services shadow shells issue mdev.conf \
-		crontab sysctl.conf 
+GENERATED_FILES := shadow
+
+ETC_FILES 	= TZ \
+		crontab \
+		fstab \
+		group \
+		hostname \
+		hosts \
+		inittab \
+		issue \
+		mdev.conf \
+		nsswitch.conf \
+		passwd \
+		profile \
+		protocols \
+		services \
+		shells \
+		sysctl.conf \
+
 CONFD_FILES = $(addprefix conf.d/, cron hwclock localinit rdate syslog tuntap vlan watchdog)
 SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status
 RC_SH_FILES 	=rc-services.sh
@@ -22,7 +37,7 @@ DISTFILES 	=$(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES)\
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
-		cd $$i && make && cd ..  ; \
+		cd $$i && $(MAKE) && cd ..  ; \
 	done
 
 clean:
@@ -30,21 +45,6 @@ clean:
 		cd $$i && make clean && cd .. ; \
 	done
 	rm -f $(TARBALL) $(GENERATED_FILES) *~
-
-TZ:
-	echo "UTC" > TZ
-
-hostname:
-	echo localhost > hostname
-
-hosts:
-	echo "127.0.0.1	localhost" > hosts
-
-profile:
-	echo "export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin" > $@
-	echo "export PAGER=less" >> $@
-	echo "export PS1='\\h:\\w\\$$ '" >>$@
-	echo "umask 022" >> $@
 
 shadow:	passwd
 	@lastchange=$$(( `date +%s` / ( 24 * 3600 ) ));\
@@ -54,7 +54,7 @@ shadow:	passwd
 		print $$1 pw "'"$$lastchange"':0:::::"  \
 	}' passwd > $@
 
-install:
+install: $(GENERATED_FILES)
 	install -m 0755 -d $(addprefix $(DESTDIR)/, \
 		dev \
 		dev/pts \
@@ -104,7 +104,7 @@ install:
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make install && cd .. ;\
 	done
-	install -m 0644 $(ETC_FILES) $(DESTDIR)/etc
+	install -m 0644 $(ETC_FILES) $(GENERATED_FILES) $(DESTDIR)/etc
 	install -m 0644 $(SENDBUG_FILES) $(DESTDIR)/etc/sendbug
 	chmod 600 $(DESTDIR)/etc/shadow
 	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
