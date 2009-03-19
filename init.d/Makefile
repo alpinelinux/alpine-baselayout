@@ -2,7 +2,6 @@ SCRIPTS = alpinecfg.sh \
 	bootmisc.sh \
 	checkfs \
 	checkroot.sh \
-	coldplug \
 	cron \
 	dnsd \
 	hostname \
