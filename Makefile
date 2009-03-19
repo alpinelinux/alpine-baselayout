@@ -121,17 +121,17 @@ install: $(GENERATED_FILES)
 
 
 $(TARBALL): $(DISTFILES) $(SUBDIRS)
-	rm -rf $(PACKAGE)
-	mkdir $(PACKAGE)
+	rm -rf $(PV)
+	mkdir $(PV)
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make clean && cd .. ; \
 	done
-	cp $(DISTFILES) $(PACKAGE)
-	mkdir $(PACKAGE)/conf.d
-	cp $(CONFD_FILES) $(PACKAGE)/conf.d/
-	rsync -Cr $(SUBDIRS) $(PACKAGE)
-	tar -cjf $@ $(PACKAGE)
-	rm -r $(PACKAGE)
+	cp $(DISTFILES) $(PV)
+	mkdir $(PV)/conf.d
+	cp $(CONFD_FILES) $(PV)/conf.d/
+	rsync -Cr $(SUBDIRS) $(PV)
+	tar -cjf $@ $(PV)
+	rm -r $(PV)
 
 dist:	$(TARBALL)
 
