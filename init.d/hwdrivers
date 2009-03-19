@@ -6,30 +6,27 @@ start() {
 	for i in `cat /proc/cmdline`; do
 		case $i in
 			modules=*)
-				MODULES="`echo ${i#modules=} | tr ',' ' '`";;
+				MODULES="$MODULES `echo ${i#modules=} | tr ',' ' '`";;
 			noautodetect)
 				AUTODETECT=no;;
 		esac
-
 	done
-
-	if [ "$MODULES" ] || [ "$AUTODETECT" != no ] ; then
-		ebegin "Loading hardware drivers"
-	else
-		ebegin "Skipping hardware drivers"
-		eend
-		return
-	fi	
 	
-	[ "$MODULES" ] && modprobe $MODULES 2> /dev/null
+	if [ "$MODULES" ]; then
+		ebegin "Loading boot drivers"
+		modprobe -a $MODULES 2> /dev/null
+		eend $?
+	fi
 
 	if [ "$AUTODETECT" != no ] ; then
-		find /sys -name modalias | xargs sort | while read a ; do
-			modprobe $a 2>/dev/null \
-				|| echo $a >> /tmp/hwdrivers.failed
-		done
+		ebegin "Loading hardware drivers"
+		# first run we find the controllers 
+		# second we find the discs
+		find /sys -name modalias | xargs sort -u \
+			| xargs modprobe -a  2> /dev/null
+		find /sys -name modalias | xargs sort -u \
+			| xargs modprobe -a 2> /dev/null
 	fi
 	eend 0
 }
-
 
