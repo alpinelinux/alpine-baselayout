@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# NOTE: since mdev -s only provide $MDEV, don't depend on any hotplug vars.
+
+current=$(readlink usbdisk)
+
+if [ "$current" = "$MDEV" ] && [ "$ACTION" = "remove" ]; then
+	rm -f usbdisk usba1 
+fi
+[ -n "$current" ] && exit
+
+if [ -e /sys/block/*/$MDEV ] ; then
+	PARENT=$(dirname /sys/block/*/$MDEV)
+	SYSDEV=$(readlink -f $PARENT/device)
+	# if /sys device path contains '/usb[0-9]' then we assume its usb
+	if [ "${SYSDEV##*/usb[0-9]}" != "$SYSDEV" ]; then
+		ln -sf $MDEV usbdisk
+		# keep this for compat. people have it in fstab
+		ln -sf $MDEV usba1
+	fi
+fi
+
