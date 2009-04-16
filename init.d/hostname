@@ -1,9 +1,0 @@
-#!/sbin/runscript
-
-start() {
-	if [ -f /etc/hostname ] ; then
-		ebegin "Setting hostname"
-		hostname -F /etc/hostname
-		eend $?
-	fi
-}
