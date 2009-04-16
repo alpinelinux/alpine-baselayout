@@ -20,7 +20,7 @@ blacklist e100
 
 # Alternate 8139 driver.  Some 8139 cards need this specific driver,
 # though...
-blacklist 8139cp
+# blacklist 8139cp
 
 # Ethernet over IEEE1394 module.  In too many cases this will load
 # when there's no eth1394 device present (just an IEEE1394 port)
