@@ -1,28 +1,9 @@
-SCRIPTS = alpinecfg.sh \
-	bootmisc.sh \
-	checkfs \
-	checkroot.sh \
-	cron \
+SCRIPTS = cron \
 	dnsd \
-	hostname \
 	httpd \
-	hwclock \
 	hwdrivers \
 	inetd \
-	keymap \
-	localinit \
-	localmount \
 	mdev \
-	modutils \
-	networking \
-	procps \
-	rc.local \
-	rcK \
-	rcL \
-	rcS \
-	rdate\
-	runtimes \
-	swap\
 	syslog \
 	tuntap \
 	vlan \

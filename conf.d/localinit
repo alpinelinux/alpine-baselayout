@@ -1,3 +1,0 @@
-# look only for localinit in those dirs.
-# set to "" to disable localinit
-MOUNTS="usb floppy cdrom"

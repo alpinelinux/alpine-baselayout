@@ -24,16 +24,13 @@ ETC_FILES 	= TZ \
 		shells \
 		sysctl.conf \
 
-CONFD_FILES = $(addprefix conf.d/, cron hwclock localinit rdate syslog tuntap vlan watchdog)
-SBIN_FILES	=runscript-alpine.sh functions.sh rc_add rc_delete rc_status
-RC_SH_FILES 	=rc-services.sh
+CONFD_FILES = $(addprefix conf.d/, cron hwclock rdate syslog tuntap vlan watchdog)
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links usbdisk_link subdir_dev usbdev dvbdev
 MODPROBED_FILES	=aliases blacklist i386
-SENDBUG_FILES	=sendbug.conf
 CRONTABS 	=crontab
-DISTFILES 	=$(ETC_FILES) $(SBIN_FILES) $(UDHCPC_FILES) $(RC_SH_FILES)\
-		$(LIB_MDEV_FILES) $(SENDBUG_FILES) $(MODPROBED_FILES) Makefile
+DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(LIB_MDEV_FILES)\
+		$(MODPROBED_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
@@ -73,13 +70,9 @@ install: $(GENERATED_FILES)
 		etc/periodic/hourly \
 		etc/periodic/monthly \
 		etc/periodic/weekly \
-		etc/rcK.d \
-		etc/rcL.d \
-		etc/sendbug \
 		home \
 		lib/firmware \
 		lib/mdev \
-		lib/rcscripts/sh \
 		media/cdrom \
 		media/floppy \
 		media/usb \
@@ -105,12 +98,9 @@ install: $(GENERATED_FILES)
 		cd $$i && make install && cd .. ;\
 	done
 	install -m 0644 $(ETC_FILES) $(GENERATED_FILES) $(DESTDIR)/etc
-	install -m 0644 $(SENDBUG_FILES) $(DESTDIR)/etc/sendbug
 	chmod 600 $(DESTDIR)/etc/shadow
 	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
-	install -m 0755 $(SBIN_FILES) $(DESTDIR)/sbin
 	install -m 0755 $(UDHCPC_FILES) $(DESTDIR)/usr/share/udhcpc
-	install -m 0755 $(RC_SH_FILES) $(DESTDIR)/lib/rcscripts/sh
 	install -m 0755 $(LIB_MDEV_FILES) $(DESTDIR)/lib/mdev
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root

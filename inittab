@@ -1,7 +1,8 @@
 # /etc/inittab
 
-::sysinit:/etc/init.d/rcS
-::wait:/etc/init.d/rcL
+::sysinit:/sbin/rc sysinit
+::wait:/sbin/rc boot
+::wait:/sbin/rc default
 
 # Set up a couple of getty's
 tty1::respawn:/sbin/getty 38400 tty1
@@ -17,7 +18,7 @@ tty4::respawn:/sbin/getty 38400 tty4
 ::ctrlaltdel:/sbin/reboot
 
 # Stuff to do before rebooting
-::shutdown:/etc/init.d/rcK
+::shutdown:/sbin/rc shutdown
 null::shutdown:/bin/umount -a -r 2>/dev/null
 null::shutdown:/sbin/swapoff -a 2>/dev/null
 
