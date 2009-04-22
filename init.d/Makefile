@@ -4,6 +4,8 @@ SCRIPTS = cron \
 	hwdrivers \
 	inetd \
 	mdev \
+	rcL \
+	rcS \
 	syslog \
 	tuntap \
 	vlan \
