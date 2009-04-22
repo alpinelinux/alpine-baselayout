@@ -5,6 +5,7 @@ SCRIPTS = cron \
 	inetd \
 	mdev \
 	rcL \
+	rcK \
 	rcS \
 	syslog \
 	tuntap \
