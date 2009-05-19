@@ -92,7 +92,7 @@ install: $(GENERATED_FILES)
 		var/run \
 		var/spool/cron \
 		)
-	install -d -m 0770 $(DESTDIR)/root
+	install -d -m 0700 $(DESTDIR)/root
 	install -d -m 1777 $(DESTDIR)/tmp $(DESTDIR)/var/tmp
 	for i in $(SUBDIRS) ; do \
 		cd $$i && make install && cd .. ;\
