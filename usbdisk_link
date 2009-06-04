@@ -14,8 +14,8 @@ if [ -e /sys/block/$MDEV ]; then
 	# if /sys device path contains '/usb[0-9]' then we assume its usb
 	# also, if its an usb without partitions we require FAT
 	if [ "${SYSDEV##*/usb[0-9]}" != "$SYSDEV" ]; then
-		# do not create link if there is an MBR signature
-		dd if=/dev/$MDEV bs=1 count=2 skip=510 2>/dev/null | hexdump | grep aa55 >/dev/null && exit 0
+		# do not create link if there is not FAT
+		dd if=/dev/$MDEV bs=512 count=1 2>/dev/null | strings | grep FAT >/dev/null || exit 0
 
 		ln -sf $MDEV usbdisk
 		# keep this for compat. people have it in fstab
