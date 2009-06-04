@@ -1,8 +1,15 @@
 #!/sbin/runscript
 
+depend() {
+	provide dev
+	need sysfs mdev-mount
+	before checkfs fsck
+	keyword novserver
+}
+
 start() {
 	# check if udev is specified on cmd line
-	for i in `cat /proc/cmdline`; do
+	for i in `cat /proc/cmdline 2>/dev/null`; do
 		[ "$i" = "udev" ] && return 0 
 	done
 	

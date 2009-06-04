@@ -1,9 +1,14 @@
 #!/sbin/runscript
 
+depend() {
+	before checkfs fsck
+	keyword novserver
+}
+
 # Load hardware drivers
 start() {
 	# check for boot option "nocoldplug"
-	for i in `cat /proc/cmdline`; do
+	for i in `cat /proc/cmdline 2>/dev/null`; do
 		case $i in
 			modules=*)
 				MODULES="$MODULES `echo ${i#modules=} | tr ',' ' '`";;
