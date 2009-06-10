@@ -1,16 +1,10 @@
-SCRIPTS = cron \
-	dnsd \
-	httpd \
-	hwdrivers \
-	inetd \
-	mdev \
+SCRIPTS = hwdrivers \
+	modloop \
 	rcL \
 	rcK \
 	rcS \
-	syslog \
 	tuntap \
-	vlan \
-	watchdog
+	vlan 
 
 all:
 
