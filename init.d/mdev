@@ -9,36 +9,25 @@ depend() {
 
 start() {
 	# check if udev is specified on cmd line
-	for i in `cat /proc/cmdline 2>/dev/null`; do
-		[ "$i" = "udev" ] && return 0 
-	done
+	if get_bootparam "udev"; then
+		ewarn "Skipping mdev as udev requested in kernel cmdline"
+		return 0
+	fi
 	
 	ebegin "Starting mdev"
 	mkdir -p /dev
-
-	# start mdev
-	mount -t tmpfs -o exec,nosuid,mode=0755 mdev /dev
-	mknod -m 666 /dev/null c 1 3
 
 	# use mdev for hotplug
 	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
 	
 	# create devices
 	mdev -s
-	RC=$?
-
-	# create pts file system
-	[ -d /dev/pts ] || mkdir -m 755 /dev/pts
-	[ -c /dev/ptmx ] || mknod -m 666 /dev/ptmx c 5 2
-	mount -t devpts -o gid=5,mode=0620,noexec,nosuid devpts /dev/pts
-	[ -d /dev/shm ] || mkdir /dev/shm
-	mount -t tmpfs -o nodev,nosuid,noexec shm /dev/shm
-	eend $RC
+	eend $?
 }
 
 stop() {
 	ebegin "Stopping mdev"
 	echo "" > /proc/sys/kernel/hotplug
-	umount /dev/pts && umount /dev/shm && umount /dev
 	eend 
 }
+
