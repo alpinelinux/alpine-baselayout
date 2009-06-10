@@ -24,7 +24,7 @@ ETC_FILES 	= TZ \
 		shells \
 		sysctl.conf \
 
-CONFD_FILES = $(addprefix conf.d/, cron rdate syslog tuntap vlan watchdog)
+CONFD_FILES = $(addprefix conf.d/, tuntap vlan)
 UDHCPC_FILES 	=default.script 
 LIB_MDEV_FILES 	=ide_links usbdisk_link subdir_dev usbdev dvbdev
 MODPROBED_FILES	=aliases blacklist i386
