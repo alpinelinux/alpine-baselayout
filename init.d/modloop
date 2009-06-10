@@ -31,6 +31,8 @@ find_media() {
 	init_KOPT
 	alpine_mounted=
 	alpine_dev=${KOPT_alpine_dev%%:*}
+	alpine_fs=${KOPT_alpine_dev#*:}
+	[ "$alpine_fs" = "$KOPT_alpine_dev" ] && unset alpine_fs
 	# first we check if alpine_dev is mounted and use this
 	alpine_mnt=$(find_mnt /dev/$alpine_dev /proc/mounts)
 	if [ -z "$alpine_mnt" ]; then
@@ -44,6 +46,7 @@ find_media() {
 }
 
 start() {
+	local modloop mount_opts
 	find_media
 	if [ -z "$alpine_dev" ] ; then
 		ebegin "Skipping mount module loopback (specify with alpine_dev)"
@@ -52,10 +55,11 @@ start() {
 	fi
 
         modloop=${KOPT_modloop:-$KOPT_BOOT_IMAGE.cmg}
+	[ -n "$alpine_fs" ] && mount_opts = "-t $alpine_fs"
 
 	ebegin "Mounting loopback device for kernel modules"
 	if [ -z "$alpine_mounted" ]; then
-		mount $alpine_dev $alpine_mnt 2>/dev/null
+		mount $mount_opts $alpine_dev $alpine_mnt 2>/dev/null
 	fi
 	mkdir -p /.modloop /lib
 
