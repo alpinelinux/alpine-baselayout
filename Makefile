@@ -15,7 +15,6 @@ ETC_FILES 	= TZ \
 		hosts \
 		inittab \
 		issue \
-		mdev.conf \
 		nsswitch.conf \
 		passwd \
 		profile \
@@ -26,11 +25,9 @@ ETC_FILES 	= TZ \
 
 CONFD_FILES = $(addprefix conf.d/, tuntap vlan)
 UDHCPC_FILES 	=default.script 
-LIB_MDEV_FILES 	=ide_links usbdisk_link subdir_dev usbdev dvbdev
 MODPROBED_FILES	=aliases blacklist i386
 CRONTABS 	=crontab
-DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(LIB_MDEV_FILES)\
-		$(MODPROBED_FILES) Makefile
+DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(MODPROBED_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
@@ -101,7 +98,6 @@ install: $(GENERATED_FILES)
 	chmod 600 $(DESTDIR)/etc/shadow
 	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
 	install -m 0755 $(UDHCPC_FILES) $(DESTDIR)/usr/share/udhcpc
-	install -m 0755 $(LIB_MDEV_FILES) $(DESTDIR)/lib/mdev
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
