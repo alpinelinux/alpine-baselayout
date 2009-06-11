@@ -1,6 +1,4 @@
-SCRIPTS = hwdrivers \
-	modloop \
-	rcL \
+SCRIPTS = rcL \
 	rcK \
 	rcS \
 	tuntap \
