@@ -14,10 +14,6 @@ blacklist dmfe
 #evbug is a debug tool and should be loaded explicitly
 blacklist evbug
 
-# Alternate Intel EtherExpress Pro/100 support driver.  List it
-# here so it won't conflict with an already-loaded eepro100 module.
-blacklist e100
-
 # Alternate 8139 driver.  Some 8139 cards need this specific driver,
 # though...
 # blacklist 8139cp
