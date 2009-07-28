@@ -66,5 +66,6 @@ blacklist dv1394
 
 # blacklist mISDN dirver by default as we prefer dahdi drivers
 blacklist hfcmulti
-blacklist mISDN_core
+blacklist hfcpci
+blacklist hfcsusb
 
