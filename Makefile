@@ -83,6 +83,7 @@ install: $(GENERATED_FILES)
 		usr/local/lib \
 		usr/local/share \
 		usr/share/udhcpc \
+		var/cache/misc \
 		var/lib/misc \
 		var/lock/subsys \
 		var/log \
