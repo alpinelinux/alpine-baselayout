@@ -1,5 +1,5 @@
 PACKAGE=alpine-baselayout
-VERSION=2.0_beta2
+VERSION=2.0_rc1
 
 PV 		=$(PACKAGE)-$(VERSION)
 TARBALL 	=$(PV).tar.bz2
