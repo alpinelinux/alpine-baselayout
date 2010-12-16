@@ -15,7 +15,6 @@ ETC_FILES 	= TZ \
 		hosts \
 		inittab \
 		issue \
-		nsswitch.conf \
 		passwd \
 		profile \
 		protocols \
