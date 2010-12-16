@@ -24,6 +24,7 @@ sshd:x:22:
 at:x:25:at
 tape:x:26:root
 video:x:27:root
+readproc:x:30:
 squid:x:31:squid
 gdm:x:32:gdm
 xfs:x:33:xfs
@@ -47,6 +48,5 @@ slocate:x:245:
 portage:x:250:portage
 abuild:x:300:
 utmp:x:406:
-readproc:x:700:
 nogroup:x:65533:
 nobody:x:65534:
