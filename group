@@ -24,6 +24,7 @@ sshd:x:22:
 at:x:25:at
 tape:x:26:root
 video:x:27:root
+netdev:x:28:
 readproc:x:30:
 squid:x:31:squid
 gdm:x:32:gdm
@@ -36,6 +37,7 @@ cdrw:x:80:
 apache:x:81:
 nut:x:84:
 usb:x:85:
+avahi:x:86:
 vpopmail:x:89:
 users:x:100:games
 ntp:x:123:
