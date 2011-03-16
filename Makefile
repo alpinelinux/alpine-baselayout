@@ -24,7 +24,7 @@ ETC_FILES 	= TZ \
 
 CONFD_FILES = $(addprefix conf.d/, tuntap vlan)
 UDHCPC_FILES 	=default.script 
-MODPROBED_FILES	=aliases blacklist i386
+MODPROBED_FILES	=aliases.conf blacklist.conf i386.conf
 CRONTABS 	=crontab
 DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(MODPROBED_FILES) Makefile
 
