@@ -25,6 +25,7 @@ ETC_FILES 	= TZ \
 CONFD_FILES = $(addprefix conf.d/, tuntap vlan)
 UDHCPC_FILES 	=default.script 
 MODPROBED_FILES	=aliases.conf blacklist.conf i386.conf kms.conf
+PROFILED_FILES  =color_prompt
 CRONTABS 	=crontab
 DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(MODPROBED_FILES) Makefile
 
@@ -57,6 +58,7 @@ install: $(GENERATED_FILES)
 		etc/conf.d \
 		etc/crontabs \
 		etc/modprobe.d \
+		etc/profile.d \
 		etc/network/if-down.d \
 		etc/network/if-post-down.d \
 		etc/network/if-pre-up.d \
@@ -99,6 +101,7 @@ install: $(GENERATED_FILES)
 	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
 	install -m 0755 $(UDHCPC_FILES) $(DESTDIR)/usr/share/udhcpc
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
+	install -m 0755 $(PROFILED_FILES) $(DESTDIR)/etc/profile.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
 	ln -s /proc/mounts $(DESTDIR)/etc/mtab
