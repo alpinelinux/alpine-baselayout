@@ -48,7 +48,6 @@ postfix:x:207:
 postdrop:x:208:
 smmsp:x:209:smmsp
 slocate:x:245:
-portage:x:250:portage
 abuild:x:300:
 utmp:x:406:
 nogroup:x:65533:
