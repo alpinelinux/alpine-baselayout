@@ -14,7 +14,6 @@ ETC_FILES 	= TZ \
 		hostname \
 		hosts \
 		inittab \
-		issue \
 		passwd \
 		profile \
 		protocols \
