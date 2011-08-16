@@ -90,6 +90,7 @@ install: $(GENERATED_FILES)
 		var/log \
 		var/run \
 		var/spool/cron \
+		run \
 		)
 	install -d -m 0700 $(DESTDIR)/root
 	install -d -m 1777 $(DESTDIR)/tmp $(DESTDIR)/var/tmp
