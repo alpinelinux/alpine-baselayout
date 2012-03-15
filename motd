@@ -1,10 +1,8 @@
 Welcome to Alpine!
 
-The Alpine Wiki contains a large amount of how-to guides and general information
-about administrating Alpine systems.  See <http://wiki.alpinelinux.org>.
-
-Alpine consists of various free software and open source software packages.  For
-licensing information for a specific component of the distribution, please see the
-'apk info --license packagename' command.
+The Alpine Wiki contains a large amount of how-to guides and general
+information about administrating Alpine systems.
+See <http://wiki.alpinelinux.org>.
 
 You may change this message by editing /etc/motd.
+
