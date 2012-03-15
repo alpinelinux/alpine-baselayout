@@ -3,7 +3,7 @@ VERSION=2.1.1
 
 PV 		=$(PACKAGE)-$(VERSION)
 TARBALL 	=$(PV).tar.bz2
-SUBDIRS 	=src init.d
+SUBDIRS 	=src
 
 GENERATED_FILES := shadow
 
@@ -22,12 +22,10 @@ ETC_FILES 	= TZ \
 		shells \
 		sysctl.conf \
 
-CONFD_FILES = $(addprefix conf.d/, tuntap vlan)
-UDHCPC_FILES 	=default.script 
 MODPROBED_FILES	=aliases.conf blacklist.conf i386.conf kms.conf
 PROFILED_FILES  =color_prompt
 CRONTABS 	=crontab
-DISTFILES 	=$(ETC_FILES) $(UDHCPC_FILES) $(MODPROBED_FILES) Makefile
+DISTFILES 	=$(ETC_FILES) $(MODPROBED_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
@@ -57,6 +55,7 @@ install: $(GENERATED_FILES)
 		etc/apk \
 		etc/conf.d \
 		etc/crontabs \
+		etc/init.d \
 		etc/modprobe.d \
 		etc/profile.d \
 		etc/network/if-down.d \
@@ -83,7 +82,7 @@ install: $(GENERATED_FILES)
 		usr/local/bin \
 		usr/local/lib \
 		usr/local/share \
-		usr/share/udhcpc \
+		usr/share \
 		var/cache/misc \
 		var/lib/misc \
 		var/lock/subsys \
@@ -99,8 +98,6 @@ install: $(GENERATED_FILES)
 	done
 	install -m 0644 $(ETC_FILES) $(GENERATED_FILES) $(DESTDIR)/etc
 	chmod 600 $(DESTDIR)/etc/shadow
-	install -m 0644 $(CONFD_FILES) $(DESTDIR)/etc/conf.d
-	install -m 0755 $(UDHCPC_FILES) $(DESTDIR)/usr/share/udhcpc
 	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	install -m 0755 $(PROFILED_FILES) $(DESTDIR)/etc/profile.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
@@ -118,7 +115,6 @@ $(TARBALL): $(DISTFILES) $(SUBDIRS)
 	done
 	cp $(DISTFILES) $(PV)
 	mkdir $(PV)/conf.d
-	cp $(CONFD_FILES) $(PV)/conf.d/
 	rsync -Cr $(SUBDIRS) $(PV)
 	tar -cjf $@ $(PV)
 	rm -r $(PV)

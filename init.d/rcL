@@ -1,4 +1,0 @@
-#!/bin/sh
-/sbin/rc sysinit || exit 1
-/sbin/rc default
-exit 0
