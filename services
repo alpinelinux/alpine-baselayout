@@ -13,6 +13,8 @@
 # Each line describes one service, and is of the form:
 # service-name  port/protocol  [aliases ...]   [# comment]
 #
+# See services(5) for more info.
+#
 
 #
 # IANA Assignments [Well Known Ports]
@@ -180,7 +182,7 @@ dixie		96/tcp				# DIXIE Protocol Specification
 dixie		96/udp
 swift-rvf	97/tcp				# Swift Remote Virtural File Protocol
 swift-rvf	97/udp
-tacnews		98/tcp				# TAC News
+tacnews		98/tcp		linuxconf	# TAC News
 tacnews		98/udp
 metagram	99/tcp				# Metagram Relay
 metagram	99/udp
@@ -205,8 +207,8 @@ pop2		109/tcp		pop-2 postoffice# Post Office Protocol - Version 2
 pop2		109/udp		pop-2
 pop3		110/tcp		pop-3		# Post Office Protocol - Version 3
 pop3		110/udp		pop-3
-sunrpc		111/tcp		portmapper	# SUN Remote Procedure Call
-sunrpc		111/udp		portmapper
+sunrpc		111/tcp		portmapper rpcbind	# SUN Remote Procedure Call
+sunrpc		111/udp		portmapper rpcbind
 mcidas		112/tcp				# McIDAS Data Transmission Protocol
 mcidas		112/udp
 auth		113/tcp		authentication tap ident # Authentication Service
@@ -449,8 +451,12 @@ microsoft-ds	445/tcp		Microsoft-DS
 microsoft-ds	445/udp		Microsoft-DS
 kpasswd		464/tcp		kpwd		# Kerberos "passwd"
 kpasswd		464/udp		kpwd
+urd		465/tcp		smtps ssmtp	# URL Rendesvous Directory for SSM / smtp protocol over TLS/SSL
+igmpv3lite	465/udp		smtps ssmtp	# IGMP over UDP for SSM
 photuris	468/tcp
 photuris	468/udp
+rcp		469/tcp				# Radio Control Protocol
+rcp		469/udp
 saft		487/tcp				# Simple Asynchronous File Transfer
 saft		487/udp
 gss-http	488/tcp
@@ -567,14 +573,38 @@ tinc		655/tcp				# TINC control port
 tinc		655/udp
 acap		674/tcp				# Application Configuration Access Protocol
 acap		674/udp
+asipregistry	687/tcp
+asipregistry	687/udp
+realm-rusd	688/tcp				# ApplianceWare managment protocol
+realm-rusd	688/udp
+nmap		689/tcp				# Opensource Network Mapper
+nmap		689/udp
 ha-cluster	694/tcp				# Heartbeat HA-cluster
 ha-cluster	694/udp
+epp		700/tcp				# Extensible Provisioning Protocol
+epp		700/udp
+iris-beep	702/tcp				# IRIS over BEEP
+iris-beep	702/udp
 silc		706/tcp				# SILC
 silc		706/udp
 kerberos-adm	749/tcp				# Kerberos `kadmin' (v5)
 kerberos-adm	749/udp
 kerberos-iv	750/tcp		kerberos4 kdc	# Kerberos (server)
 kerberos-iv	750/udp		kerberos4 kdc
+pump		751/tcp		kerberos_master
+pump		751/udp		kerberos_master	# Kerberos authentication
+qrh		752/tcp		passwd_server
+qrh		752/udp		passwd_server	# Kerberos passwd server
+rrh		753/tcp
+rrh		753/udp
+tell		754/tcp		send krb_prop krb5_prop	# Kerberos slave propagation
+tell		754/udp		send
+nlogin		758/tcp
+nlogin		758/udp
+con		759/tcp
+con		759/udp
+ns		760/tcp		krbupdate kreg	# Kerberos registration
+ns		760/udp
 webster		765/tcp				# Network dictionary
 webster		765/udp
 phonebook	767/tcp				# Network phonebook
@@ -613,10 +643,32 @@ pop3s		995/udp
 # UDP [RFC768].
 # The Registered Ports are in the range 1024-49151.
 #
+imgames		1077/tcp
+imgames		1077/udp
 socks		1080/tcp			# socks proxy server
 socks		1080/udp
 rmiregistry	1099/tcp			# Java RMI Registry
 rmiregistry	1099/udp
+bnetgame	1119/tcp			# Battle.net Chat/Game Protocol
+bnetgame	1119/udp
+bnetfile	1120/tcp			# Battle.net File Transfer Protocol
+bnetfile	1120/udp
+hpvmmcontrol	1124/tcp			# HP VMM Control
+hpvmmcontrol	1124/udp
+hpvmmagent	1125/tcp			# HP VMM Agent
+hpvmmagent	1125/udp
+hpvmmdata	1126/tcp			# HP VMM Agent
+hpvmmdata	1126/udp
+resacommunity	1154/tcp			# Community Service
+resacommunity	1154/udp
+3comnetman	1181/tcp			# 3Com Net Management
+3comnetman	1181/udp
+mysql-cluster	1186/tcp			# MySQL Cluster Manager
+mysql-cluster	1186/udp
+alias		1187/tcp			# Alias Service
+alias		1187/udp
+openvpn		1194/tcp			# OpenVPN
+openvpn		1194/udp
 kazaa		1214/tcp			# KAZAA
 kazaa		1214/udp
 bvcontrol	1236/tcp	rmtcfg		# Gracilis Packeten remote config server
@@ -657,6 +709,10 @@ h323gatestat	1719/tcp
 h323gatestat	1719/udp
 h323hostcall	1720/tcp
 h323hostcall	1720/udp
+iberiagames	1726/tcp
+iberiagames	1726/udp
+gamegen1	1738/tcp
+gamegen1	1738/udp
 tftp-mcast	1758/tcp
 tftp-mcast	1758/udp
 hello		1789/tcp
@@ -667,6 +723,8 @@ radius-acct	1813/tcp	radacct		# Radius Accounting
 radius-acct	1813/udp	radacct
 mtp		1911/tcp			# Starlight Networks Multimedia Transport Protocol
 mtp		1911/udp
+egs		1926/tcp			# Evolution Game Server
+egs		1926/udp
 unix-status	1957/tcp			# remstats unix-status server
 unix-status	1957/udp
 hsrp		1985/tcp			# Hot Standby Router Protocol
@@ -701,6 +759,10 @@ cisco-sccp	2000/tcp	sieve		# Cisco SCCP
 cisco-sccp	2000/udp	sieve
 nfs		2049/tcp			# Network File System
 nfs		2049/udp
+radsec		2083/tcp			# Secure Radius Service
+radsec		2083/udp
+gnunet		2086/tcp			# GNUnet
+gnunet		2086/udp
 rtcm-sc104	2101/tcp			# RTCM SC-104
 rtcm-sc104	2101/udp
 zephyr-srv	2102/tcp			# Zephyr server
@@ -709,6 +771,36 @@ zephyr-clt	2103/tcp			# Zephyr serv-hm connection
 zephyr-clt	2103/udp
 zephyr-hm	2104/tcp			# Zephyr hostmanager
 zephyr-hm	2104/udp
+eyetv		2170/tcp			# EyeTV Server Port
+eyetv		2170/udp
+msfw-storage	2171/tcp			# MS Firewall Storage
+msfw-storage	2171/udp
+msfw-s-storage	2172/tcp			# MS Firewall SecureStorage
+msfw-s-storage	2172/udp
+msfw-replica	2173/tcp			# MS Firewall Replication
+msfw-replica	2173/udp
+msfw-array	2174/tcp			# MS Firewall Intra Array
+msfw-array	2174/udp
+airsync		2175/tcp			# Microsoft Desktop AirSync Protocol
+airsync		2175/udp
+rapi		2176/tcp			# Microsoft ActiveSync Remote API
+rapi		2176/udp
+qwave		2177/tcp			# qWAVE Bandwidth Estimate
+qwave		2177/udp
+tivoconnect	2190/tcp			# TiVoConnect Beacon
+tivoconnect	2190/udp
+tvbus		2191/tcp			# TvBus Messaging
+tvbus		2191/udp
+mysql-im	2273/tcp			# MySQL Instance Manager
+mysql-im	2273/udp
+dict-lookup	2289/tcp			# Lookup dict server
+dict-lookup	2289/udp
+redstorm_join	2346/tcp			# Game Connection Port
+redstorm_join	2346/udp
+redstorm_find	2347/tcp			# Game Announcement and Location
+redstorm_find	2347/udp
+redstorm_info	2348/tcp			# Information to query for game status
+redstorm_info	2348/udp
 cvspserver	2401/tcp			# CVS client/server operations
 cvspserver	2401/udp
 venus		2430/tcp			# codacon port
@@ -719,6 +811,16 @@ codasrv		2432/tcp			# not used
 codasrv		2432/udp
 codasrv-se	2433/tcp			# tcp side effects
 codasrv-se	2433/udp
+netadmin	2450/tcp
+netadmin	2450/udp
+netchat		2451/tcp
+netchat		2451/udp
+snifferclient	2452/tcp
+snifferclient	2452/udp
+ppcontrol	2505/tcp			# PowerPlay Control
+ppcontrol	2505/udp
+lstp		2559/tcp			# 
+lstp		2559/udp
 mon		2583/tcp
 mon		2583/udp
 hpstgmgr	2600/tcp	zebrasrv
@@ -741,16 +843,30 @@ wag-service	2608/tcp			# Wag Service
 wag-service	2608/udp
 dict		2628/tcp			# Dictionary server
 dict		2628/udp
+exce		2769/tcp			# eXcE
+exce		2769/udp
+dvr-esm		2804/tcp			# March Networks Digital Video Recorders and Enterprise Service Manager products
+dvr-esm		2804/udp
 corbaloc	2809/tcp			# CORBA LOC
 corbaloc	2809/udp
 ndtp		2882/tcp			# Network Dictionary Transfer Protocol
 ndtp		2882/udp
+gamelobby	2914/tcp			# Game Lobby
+gamelobby	2914/udp
 gds_db		3050/tcp			# InterBase server
 gds_db		3050/udp
+xbox		3074/tcp			# Xbox game port
+xbox		3074/udp
 icpv2		3130/tcp	icp		# Internet Cache Protocol (Squid)
 icpv2		3130/udp	icp
+nm-game-admin	3148/tcp			# NetMike Game Administrator
+nm-game-admin	3148/udp
+nm-game-server	3149/tcp			# NetMike Game Server
+nm-game-server	3149/udp
 mysql		3306/tcp			# MySQL
 mysql		3306/udp
+sftu		3326/tcp
+sftu		3326/udp
 trnsprntproxy	3346/tcp			# Transparent Proxy
 trnsprntproxy	3346/udp
 ms-wbt-server	3389/tcp	rdp		# MS WBT Server
@@ -759,20 +875,34 @@ prsvp		3455/tcp			# RSVP Port
 prsvp		3455/udp
 nut		3493/tcp			# Network UPS Tools
 nut		3493/udp
+ironstorm	3504/tcp			# IronStorm game server
+ironstorm	3504/udp
+cctv-port	3559/tcp			# CCTV control port
+cctv-port	3559/udp
+iw-mmogame	3596/tcp			# Illusion Wireless MMOG
+iw-mmogame	3596/udp
 distcc		3632/tcp			# Distributed Compiler
 distcc		3632/udp
 daap		3689/tcp			# Digital Audio Access Protocol
 daap		3689/udp
 svn		3690/tcp			# Subversion
 svn		3690/udp
+blizwow		3724/tcp			# World of Warcraft
+blizwow		3724/udp
 netboot-pxe	3928/tcp	pxe		# PXE NetBoot Manager
 netboot-pxe	3928/udp	pxe
 smauth-port	3929/tcp			# AMS Port
 smauth-port	3929/udp
-pxc-spvr-ft	4002/tcp	pxc-spvr-ft rquotad
-pxc-spvr-ft	4002/udp	pxc-spvr-ft rquotad
-pxc-splr-ft	4003/tcp	pxc-splr-ft
-pxc-splr-ft	4003/udp	pxc-splr-ft
+treehopper	3959/tcp			# Tree Hopper Networking
+treehopper	3959/udp
+cobraclient	3970/tcp			# Cobra Client
+cobraclient	3970/udp
+cobraserver	3971/tcp			# Cobra Server
+cobraserver	3971/udp
+pxc-spvr-ft	4002/tcp	pxc-spvr-ft
+pxc-spvr-ft	4002/udp	pxc-spvr-ft
+pxc-splr-ft	4003/tcp	pxc-splr-ft rquotad
+pxc-splr-ft	4003/udp	pxc-splr-ft rquotad
 pxc-roid	4004/tcp	pxc-roid
 pxc-roid	4004/udp	pxc-roid
 pxc-pin		4005/tcp	pxc-pin
@@ -781,26 +911,64 @@ pxc-spvr	4006/tcp	pxc-spvr
 pxc-spvr	4006/udp	pxc-spvr
 pxc-splr	4007/tcp	pxc-splr
 pxc-splr	4007/udp	pxc-splr
+xgrid		4111/tcp			# Mac OS X Server Xgrid
+xgrid		4111/udp
+bzr		4155/tcp			# Bazaar Version Control System
+bzr		4155/udp			# Bazaar version control system
 rwhois		4321/tcp			# Remote Who Is
 rwhois		4321/udp
+epmd		4369/tcp			# Erlang Port Mapper Daemon
+epmd		4369/udp
 krb524		4444/tcp
 krb524		4444/udp
+ipsec-nat-t	4500/tcp			# IPsec NAT-Traversal
+ipsec-nat-t	4500/udp
 hylafax		4559/tcp			# HylaFAX client-server protocol  (new)
 hylafax		4559/udp
 piranha1	4600/tcp
 piranha1	4600/udp
+playsta2-app	4658/tcp			# PlayStation2 App Port
+playsta2-app	4658/udp
+playsta2-lob	4659/tcp			# PlayStation2 Lobby Port
+playsta2-lob	4659/udp
+snap		4752/tcp			# Simple Network Audio Protocol
+snap		4752/udp
 radmin-port	4899/tcp			# RAdmin Port
 radmin-port	4899/udp
 rfe		5002/tcp			# Radio Free Ethernet
 rfe		5002/udp
 ita-agent	5051/tcp			# ITA Agent
 ita-agent	5051/udp
+sdl-ets		5081/tcp			# SDL - Ent Trans Server
+sdl-ets		5081/udp
+bzflag		5154/tcp			# BZFlag game server
+bzflag		5154/udp
+aol		5190/tcp			# America-Online
+aol		5190/udp
 xmpp-client	5222/tcp			# XMPP Client Connection
 xmpp-client	5222/udp
+caevms		5251/tcp			# CA eTrust VM Service
+caevms		5251/udp
 xmpp-server	5269/tcp			# XMPP Server Connection
 xmpp-server	5269/udp
 cfengine	5308/tcp			# CFengine
 cfengine	5308/udp
+nat-pmp		5351/tcp			# NAT Port Mapping Protocol
+nat-pmp		5351/udp
+dns-llq		5352/tcp			# DNS Long-Lived Queries
+dns-llq		5352/udp
+mdns		5353/tcp			# Multicast DNS
+mdns		5353/udp
+mdnsresponder	5354/tcp	noclog		# Multicast DNS Responder IPC
+mdnsresponder	5354/udp	noclog		# noclogd with TCP (nocol)
+llmnr		5355/tcp	hostmon		# Link-Local Multicast Name Resolution
+llmnr		5355/udp	hostmon		# hostmon uses TCP (nocol)
+dj-ice		5419/tcp
+dj-ice		5419/udp
+beyond-remote	5424/tcp			# Beyond Remote
+beyond-remote	5424/udp
+br-channel	5425/tcp			# Beyond Remote Command Channel
+br-channel	5425/udp
 postgresql	5432/tcp			# POSTGRES
 postgresql	5432/udp
 sgi-eventmond	5553/tcp			# SGI Eventmond Port
@@ -811,12 +979,20 @@ cvsup		5999/tcp			# CVSup
 cvsup		5999/udp
 x11		6000/tcp			# X Window System
 x11		6000/udp
+kftp-data	6620/tcp			# Kerberos V5 FTP Data
+kftp-data	6620/udp
+kftp		6621/tcp			# Kerberos V5 FTP Control
+kftp		6621/udp
+ktelnet		6623/tcp			# Kerberos V5 Telnet
+ktelnet		6623/udp
 gnutella-svc	6346/tcp
 gnutella-svc	6346/udp
 gnutella-rtr	6347/tcp
 gnutella-rtr	6347/udp
 sane-port	6566/tcp			# SANE Network Scanner Control Port
 sane-port	6566/udp
+parsec-game	6582/tcp			# Parsec Gameserver
+parsec-game	6582/udp
 afs3-fileserver 7000/tcp	bbs		# file server itself
 afs3-fileserver 7000/udp	bbs
 afs3-callback   7001/tcp			# callbacks to cache managers
@@ -839,30 +1015,76 @@ afs3-rmtsys     7009/tcp			# remote cache manager service
 afs3-rmtsys     7009/udp
 font-service	7100/tcp	xfs		# X Font Service
 font-service	7100/udp	xfs
+sncp		7560/tcp			# Sniffer Command Protocol
+sncp		7560/udp
+soap-http	7627/tcp			# SOAP Service Port
+soap-http	7627/udp
 http-alt	8008/tcp			# HTTP Alternate
 http-alt	8008/udp
-http-alt	8080/tcp			# HTTP Alternate
-http-alt	8080/udp
+http-alt	8080/tcp	webcache	# HTTP Alternate
+http-alt	8080/udp	webcache	# WWW caching service
+sunproxyadmin	8081/tcp	tproxy		# Sun Proxy Admin Service
+sunproxyadmin	8081/udp	tproxy		# Transparent Proxy
+pichat		9009/tcp			# Pichat Server
+pichat		9009/udp
 bacula-dir	9101/tcp			# Bacula Director
 bacula-dir	9101/udp
 bacula-fd	9102/tcp			# Bacula File Daemon
 bacula-fd	9102/udp
 bacula-sd	9103/tcp			# Bacula Storage Daemon
 bacula-sd	9103/udp
+dddp		9131/tcp			# Dynamic Device Discovery
+dddp		9131/udp
+wap-wsp		9200/tcp			# WAP connectionless session service
+wap-wsp		9200/udp
+wap-wsp-wtp	9201/tcp			# WAP session service
+wap-wsp-wtp	9201/udp
+wap-wsp-s	9202/tcp			# WAP secure connectionless session service
+wap-wsp-s	9202/udp
+wap-wsp-wtp-s	9203/tcp			# WAP secure session service
+wap-wsp-wtp-s	9203/udp
+wap-vcard	9204/tcp			# WAP vCard
+wap-vcard	9204/udp
+wap-vcal	9205/tcp			# WAP vCal
+wap-vcal	9205/udp
+wap-vcard-s	9206/tcp			# WAP vCard Secure
+wap-vcard-s	9206/udp
+wap-vcal-s	9207/tcp			# WAP vCal Secure
+wap-vcal-s	9207/udp
+git		9418/tcp			# git pack transfer service
+git		9418/udp
+cba8		9593/tcp			# LANDesk Management Agent
+cba8		9593/udp
+davsrc		9800/tcp			# WebDav Source Port
+davsrc		9800/udp
+sqlexec		9088/tcp			# IBM Informix SQL Interface
+sqlexec		9088/udp
+sqlexec-ssl	9089/tcp			# IBM Informix SQL Interface - Encrypted
+sqlexec-ssl	9089/udp
 sd		9876/tcp			# Session Director
 sd		9876/udp
 cyborg-systems	9888/tcp			# CYBORG Systems
 cyborg-systems	9888/udp
 monkeycom	9898/tcp			# MonkeyCom
 monkeycom	9898/udp
+sctp-tunneling	9899/tcp			# SCTP TUNNELING
+sctp-tunneling	9899/udp
+domaintime	9909/tcp			# domaintime
+domaintime	9909/udp
 amanda		10080/tcp			# amanda backup services
 amanda		10080/udp
+vce		11111/tcp			# Viral Computing Environment (VCE)
+vce		11111/udp
 smsqp		11201/tcp			# Alamin SMS gateway
 smsqp		11201/udp
 hkp		11371/tcp			# OpenPGP HTTP Keyserver
 hkp		11371/udp
 h323callsigalt	11720/tcp			# h323 Call Signal Alternate
 h323callsigalt	11720/udp
+rets-ssl	12109/tcp			# RETS over SSL
+rets-ssl	12109/udp
+cawas		12168/tcp			# CA Web Access Service
+cawas		12168/udp
 bprd		13720/tcp			# BPRD Protocol (VERITAS NetBackup)
 bprd		13720/udp
 bpdbm		13721/tcp			# BPDBM Protocol (VERITAS NetBackup)
@@ -885,20 +1107,24 @@ quake		26000/tcp			# Quake @!#
 quake		26000/udp
 wnn6-ds		26208/tcp
 wnn6-ds		26208/udp
+tetrinet	31457/tcp			# TetriNET Protocol
+tetrinet	31457/udp
+gamesmith-port	31765/tcp			# GameSmith Port
+gamesmith-port	31765/udp
 traceroute	33434/tcp			# traceroute use
 traceroute	33434/udp
+candp		42508/tcp			# Computer Associates network discovery protocol
+candp		42508/udp
+candrp		42509/tcp			# CA discovery response
+candrp		42509/udp
+caerpc		42510/tcp			# CA eTrust RPC
+caerpc		42510/udp
 
 #=========================================================================
 # The remaining port numbers are not as allocated by IANA.
 
 # Kerberos (Project Athena/MIT) services
 # Note that these are for Kerberos v4, and are unofficial
-kerberos_master	751/tcp				# Kerberos authentication
-kerberos_master	751/udp
-passwd_server	752/tcp				# Kerberos passwd server
-passwd_server	752/udp
-krb_prop	754/tcp				# Kerberos slave propagation
-krbupdate	760/tcp		kreg		# Kerberos registration
 kpop		1109/tcp			# Pop with Kerberos
 knetd		2053/tcp			# Kerberos de-multiplexor
 eklogin		2105/tcp			# Kerberos encrypted rlogin
@@ -914,9 +1140,6 @@ echo		4/ddp				# AppleTalk Echo Protocol
 zip		6/ddp				# Zone Information Protocol
 
 # Many services now accepted as 'standard'
-linuxconf	98/tcp				# LinuxConf
-smtps		465/tcp		ssmtp		# smtp protocol over TLS/SSL
-smtps		465/udp		ssmtp
 swat		901/tcp				# Samba configuration tool
 rndc		953/tcp				# rndc control sockets (BIND 9)
 rndc		953/udp
@@ -929,10 +1152,6 @@ ninstall	2150/udp
 afbackup	2988/tcp			# Afbackup system
 afbackup	2988/udp
 fax		4557/tcp			# FAX transmission service        (old)
-noclog		5354/tcp			# noclogd with TCP (nocol)
-noclog		5354/udp
-hostmon		5355/tcp			# hostmon uses TCP (nocol)
-hostmon		5355/udp
 rplay		5555/tcp			# RPlay audio service
 rplay		5555/udp
 canna		5680/tcp			# Canna (Japanese Input)
@@ -940,11 +1159,7 @@ x11-ssh		6010/tcp	x11-ssh-offset
 x11-ssh		6010/udp	x11-ssh-offset
 ircd		6667/tcp			# Internet Relay Chat
 ircd		6667/udp
-webcache	8080/tcp			# WWW caching service
-webcache	8080/udp
-tproxy		8081/tcp			# Transparent Proxy
-tproxy		8081/udp
-jetdirect	9100/tcp			#HP JetDirect card
+jetdirect	9100/tcp			# HP JetDirect card
 jetdirect	9100/udp
 mandelspawn	9359/udp	mandelbrot	# network mandelbrot
 kamanda		10081/tcp			# amanda backup services (Kerberos)
