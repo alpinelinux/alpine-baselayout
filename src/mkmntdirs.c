@@ -54,7 +54,7 @@ int main(int argc, const char *argv[])
 
 	f = setmntent(filename, "r");
 	if (f == NULL)
-		err(1, filename);
+		err(1, "%s", filename);
 
 	while ((ent = getmntent(f)) != NULL) {
 		if (strcmp(ent->mnt_dir, "none") != 0)
