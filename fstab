@@ -1,4 +1,4 @@
 /dev/cdrom	/media/cdrom	iso9660	noauto,ro 0 0
 /dev/fd0	/media/floppy	vfat	noauto	0 0
-/dev/usbdisk	/media/usb	vfat	noauto	0 0
+/dev/usbdisk	/media/usb	vfat	noauto,ro 0 0
 usbfs		/proc/bus/usb	usbfs 	noauto 0 0
