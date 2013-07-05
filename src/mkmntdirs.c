@@ -12,7 +12,6 @@
 #include <sys/types.h>
 
 #include <err.h>
-#include <error.h>
 #include <mntent.h>
 #include <stdio.h>
 
