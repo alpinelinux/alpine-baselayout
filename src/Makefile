@@ -1,6 +1,6 @@
 
-CC = gcc
-LD = gcc
+CC = ${CROSS_COMPILE}gcc
+LD = ${CROSS_COMPILE}gcc
 
 SBIN_TARGETS = mkmntdirs 
 TARGET = $(BIN_TARGETS) $(SBIN_TARGETS) $(USR_BIN_TARGETS)
