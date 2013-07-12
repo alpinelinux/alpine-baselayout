@@ -39,7 +39,7 @@ clean:
 	rm -f $(TARBALL) $(GENERATED_FILES) *~
 
 shadow:	passwd
-	@lastchange=$$(( `date +%s` / ( 24 * 3600 ) ));\
+	lastchange=$$(( `date +%s` / ( 24 * 3600 ) ));\
 	awk -F: ' { \
 		pw = ":!:";\
 		if ($$1 == "root") { pw = "::" };\
