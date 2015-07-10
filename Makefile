@@ -19,13 +19,13 @@ ETC_FILES 	= TZ \
 		profile \
 		protocols \
 		services \
-		shells \
-		sysctl.conf \
+		shells
 
 MODPROBED_FILES	=aliases.conf blacklist.conf i386.conf kms.conf
 PROFILED_FILES  =color_prompt
+SYSCTL_FILES	=00-alpine.conf
 CRONTABS 	=crontab
-DISTFILES 	=$(ETC_FILES) $(MODPROBED_FILES) Makefile
+DISTFILES 	=$(ETC_FILES) $(SYSCTL_FILES) $(MODPROBED_FILES) Makefile
 
 all:	$(GENERATED_FILES)
 	for i in $(SUBDIRS) ; do \
@@ -58,6 +58,7 @@ install: $(GENERATED_FILES)
 		etc/init.d \
 		etc/modprobe.d \
 		etc/profile.d \
+		etc/sysctl.d \
 		etc/network/if-down.d \
 		etc/network/if-post-down.d \
 		etc/network/if-pre-up.d \
@@ -98,8 +99,9 @@ install: $(GENERATED_FILES)
 	done
 	install -m 0644 $(ETC_FILES) $(GENERATED_FILES) $(DESTDIR)/etc
 	chmod 600 $(DESTDIR)/etc/shadow
-	install -m 0755 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
+	install -m 0644 $(MODPROBED_FILES) $(DESTDIR)/etc/modprobe.d
 	install -m 0755 $(PROFILED_FILES) $(DESTDIR)/etc/profile.d
+	install -m 0644 $(SYSCTL_FILES) $(DESTDIR)/etc/sysctl.d
 	mv $(DESTDIR)/etc/crontab $(DESTDIR)/etc/crontabs/root
 	ln -s /etc/crontabs $(DESTDIR)/var/spool/cron/crontabs
 	ln -s /proc/mounts $(DESTDIR)/etc/mtab
